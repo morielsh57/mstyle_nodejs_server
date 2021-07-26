@@ -1,6 +1,6 @@
 const bcrypt = require("bcrypt");
 const _ = require("lodash");
-const { UserModel, validUser, validLogin, genToken,sendEmail } = require("../models/userModel");
+const { UserModel, validUser, validLogin, genToken,sendEmail, validEditUser } = require("../models/userModel");
 const { use } = require("../routes/users");
 
 exports.createUser = async (req, res) => {
@@ -105,5 +105,19 @@ exports.deleteUser = async (req, res) => {
   catch (err) {
     console.log(err);
     res.status(400).send(err)
+  }
+}
+
+//can edit just the name, phone, address.
+exports.editUser = async (req, res) => {
+  let validBody = validEditUser(req.body);
+  if (validBody.error) return res.status(400).json(validBody.error.details);
+  try {
+    let data = await UserModel.updateOne({ _id: req.params.id }, req.body);
+    res.status(201).json(data);
+  }
+  catch (err) {
+    console.log(err);
+    res.status(400).send(err);
   }
 }

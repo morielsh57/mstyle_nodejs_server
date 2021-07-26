@@ -22,4 +22,6 @@ router.get("/myInfo",authToken , userController.userInfo);
 
 router.delete("/:id", authToken, authAdminToken , userController.deleteUser);
 
+router.put("/:id", authToken, authAdminToken, userController.editUser);
+
 module.exports = router;
