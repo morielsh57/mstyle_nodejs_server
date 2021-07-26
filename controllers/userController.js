@@ -11,7 +11,7 @@ exports.createUser = async (req, res) => {
   try {
     let user = new UserModel(req.body);
     let salt = await bcrypt.genSalt(10);
-    user.pass = user.pass2 = await bcrypt.hash(user.pass, salt);
+    user.password = await bcrypt.hash(user.password, salt);
     await user.save();
     sendEmail(user.email, user._id);
     res.status(201).json({message:"verify your email"});
@@ -38,7 +38,7 @@ exports.loginUser = async (req, res) => {
     if(!user.isValidEmail){
       return res.status(400).json({ message: "Please verify your email, before you login" });
     }
-    let validPass = await bcrypt.compare(req.body.pass, user.pass);
+    let validPass = await bcrypt.compare(req.body.password, user.password);
     if (!validPass) {
       return res.status(400).json({ message: "Username or password is incorrect" });
     }

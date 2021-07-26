@@ -32,13 +32,11 @@ exports.genToken = (_id) => {
 
 exports.validUser = (_bodyUser) => {
   let joiSchema = Joi.object({
-    name: Joi.string().min(2).max(100).required(),
-    email: Joi.string().min(2).max(100).email().required(),
-    phone: Joi.string().min(9).max(20).required(),
-    pass: Joi.string().min(2).max(100).required(),
-    pass2: Joi.string().min(2).max(100).required(),
-    address: Joi.string().min(2).max(200).allow(null, ''),
-    avatarImg: Joi.string().min(2).max(200).allow(null, ''),
+    name: joi_1.default.string().min(2).max(100).required(),
+    email: joi_1.default.string().min(2).max(100).email().required(),
+    phone: joi_1.default.string().min(9).max(20).required(),
+    password: joi_1.default.string().min(2).max(100).required(),
+    address: joi_1.default.string().min(2).max(200).allow(null, ''),
   })
   return joiSchema.validate(_bodyUser);
 }
@@ -47,7 +45,7 @@ exports.validUser = (_bodyUser) => {
 exports.validLogin = (_bodyUser) => {
   let joiSchema = Joi.object({
     email: Joi.string().min(2).max(100).email().required(),
-    pass: Joi.string().min(2).max(100).required()
+    password: Joi.string().min(2).max(100).required()
   })
   return joiSchema.validate(_bodyUser);
 }
@@ -57,7 +55,6 @@ exports.validEditUser = (_bodyUser) => {
     name: Joi.string().min(2).max(100).required(),
     phone: Joi.string().min(9).max(20).required(),
     address: Joi.string().min(2).max(200).allow(null, ''),
-    avatarImg: Joi.string().min(2).max(200).allow(null, ''),
   })
   return joiSchema.validate(_bodyUser);
 }
