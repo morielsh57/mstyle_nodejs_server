@@ -6,7 +6,7 @@ const {config} = require("../config/configData")
 exports.authToken = (req,res,next) => {
   let token = req.header("auth-token");
   if(!token){
-    return res.status(400).json({msg:"you must send token in this url to get data"});
+    return res.status(400).json({message:"you must send token in this url to get data"});
   }
   try{
 
@@ -17,7 +17,7 @@ exports.authToken = (req,res,next) => {
   }
   catch (err) {
     console.log(err);
-    res.status(400).json({msg:"token invalid or expired"});
+    res.status(400).json({message:"token invalid or expired"});
   }
 }
 
@@ -26,12 +26,12 @@ exports.authAdminToken = async(req,res,next) => {
   try{
     let user = await UserModel.findOne({_id:req.userData._id})
     if(user.role != "admin"){
-     return res.status(401).json({msg:"You must be an admin user to send here data"})
+     return res.status(401).json({message:"You must be an admin user to send here data"})
     }
     next()
   }
   catch (err) {
     console.log(err);
-    res.status(401).json({msg:"err system"});
+    res.status(401).json({message:"err system"});
   }
 }
