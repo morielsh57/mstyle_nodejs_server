@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
 const {UserModel} = require("../models/userModel")
-const {config} = require("../config/secretData")
+const {config} = require("../config/configData")
 
 
 exports.authToken = (req,res,next) => {

@@ -1,7 +1,6 @@
 const bcrypt = require("bcrypt");
 const _ = require("lodash");
-const { ProdModel } = require("../models/prodModel");
-const { UserModel, validUser, validLogin, genToken, validEditUser, validCountCart, validArrayCart, getUniqueString,sendEmail } = require("../models/userModel");
+const { UserModel, validUser, validLogin, genToken,sendEmail } = require("../models/userModel");
 const { use } = require("../routes/users");
 
 exports.createUser = async (req, res) => {
@@ -13,7 +12,6 @@ exports.createUser = async (req, res) => {
     let user = new UserModel(req.body);
     let salt = await bcrypt.genSalt(10);
     user.pass = user.pass2 = await bcrypt.hash(user.pass, salt);
-    user.uniqueString = await getUniqueString()
     await user.save();
     sendEmail(user.email, user._id);
     res.status(201).json({message:"verify your email"});
