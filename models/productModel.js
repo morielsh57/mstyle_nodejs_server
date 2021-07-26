@@ -4,7 +4,6 @@ const Joi = require("joi");
 const productSchema = new mongoose.Schema({
   name: String,
   catalogNumber: Number,
-  shortID: Number,
   information: String,
   quantity: Number,
   tags: String,
@@ -20,7 +19,7 @@ const productSchema = new mongoose.Schema({
   }
 })
 
-exports.productModel = mongoose.model("products", productSchema);
+exports.ProductModel = mongoose.model("products", productSchema);
 
 exports.validProduct = (_bodyData) => {
   let joiSchema = Joi.object({
@@ -38,4 +37,18 @@ exports.validProduct = (_bodyData) => {
   })
 
   return joiSchema.validate(_bodyData);
+}
+
+exports.generateCatalogNum = async () => {
+  let rnd;
+  let okFlag = false;
+  
+  while (!okFlag) {
+    rnd = random(100000, 999999);
+    let data = await this.ProductModel.findOne({ catalogNumber: rnd });
+    if (!data) {
+      okFlag = true;
+    }
+  }
+  return rnd;
 }
