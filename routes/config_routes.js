@@ -1,6 +1,7 @@
 const indexR = require("./index");
 const usersR = require("./users");
-const categoriesR = require("./categories");
+const categoryR = require("./categories");
+const productR = require("./products");
 
 exports.corseAccessControl = (app) => {
   app.all('*',  (req, res, next) => {
@@ -15,7 +16,8 @@ exports.corseAccessControl = (app) => {
 exports.routesInit = (app) => {
   app.use("/", indexR);
   app.use("/users", usersR);
-  app.use("/categories", categoriesR);
+  app.use("/categories", categoryR);
+  app.use("/products", productR);
   
   app.use((req,res) => {
     res.status(404).json({msg:"404 url page not found"})
