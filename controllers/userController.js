@@ -54,3 +54,39 @@ exports.loginUser = async (req, res) => {
 exports.checkIfAdmin = async (req, res) => {
   res.json({ auth: "admin" })
 }
+
+//get list of users for admin panel
+exports.usersList = async (req, res) => {
+  try {
+    let data = await UserModel.find({}, { pass: 0 })
+    res.json(data);
+  }
+  catch (err) {
+    console.log(err);
+    res.status(400).send(err);
+  }
+}
+
+exports.singleUser = async (req, res) => {
+  try {
+    let data = await UserModel.findOne({ _id: req.params.id }, { pass: 0, email: 0 })
+    res.json(data);
+  }
+  catch (err) {
+    console.log(err);
+    res.status(400).send(err);
+  }
+}
+
+//get information of the user that the token is belong to him
+exports.userInfo = async (req, res) => {
+  try {
+    // req.userData -> from the middleware authToken in the route "/myInfo"
+    let user = await UserModel.findOne({ _id: req.userData._id }, { pass: 0 });
+    res.json(user);
+  }
+  catch (err) {
+    console.log(err);
+    res.status(400).send(err);
+  }
+}

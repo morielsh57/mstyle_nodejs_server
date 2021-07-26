@@ -14,5 +14,10 @@ router.post('/login', userController.loginUser);
 
 router.post("/checkAdmin",authToken,authAdminToken, userController.checkIfAdmin);
 
+router.get('/usersList',authToken,authAdminToken, userController.usersList);
+
+router.get('/single/:id', userController.singleUser);
+
+router.get("/myInfo",authToken , userController.userInfo);
 
 module.exports = router;
