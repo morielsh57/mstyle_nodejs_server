@@ -19,7 +19,7 @@ exports.validCategory = (_bodyData) => {
 
 //numbering by the last product to give it a shorter id than the original id(from mongo)
 //s_id
-exports.generateShortId = async () => {
+exports.generateShortID = async () => {
   let rnd;
   let okFlag = false;
   
