@@ -25,7 +25,7 @@ exports.createUser = async (req, res) => {
 }
 
 //get a token
-exports.login = async (req, res) => {
+exports.loginUser = async (req, res) => {
   let validBody = validLogin(req.body);
   if (validBody.error) {
     return res.status(400).json(validBody.error.details);
@@ -51,4 +51,8 @@ exports.login = async (req, res) => {
     console.log(err);
     res.status(400).send(err);
   }
+}
+
+exports.checkIfAdmin = async (req, res) => {
+  res.json({ auth: "admin" })
 }
