@@ -2,8 +2,6 @@ const mongoose = require("mongoose");
 const Joi = require("joi");
 const jwt = require("jsonwebtoken")
 const { config } = require("../config/configData")
-const _ = require("lodash");
-const { random } = require("lodash");
 const nodemailer = require('nodemailer');
 
 let userSchema = new mongoose.Schema({
@@ -32,11 +30,11 @@ exports.genToken = (_id) => {
 
 exports.validUser = (_bodyUser) => {
   let joiSchema = Joi.object({
-    name: joi_1.default.string().min(2).max(100).required(),
-    email: joi_1.default.string().min(2).max(100).email().required(),
-    phone: joi_1.default.string().min(9).max(20).required(),
-    password: joi_1.default.string().min(2).max(100).required(),
-    address: joi_1.default.string().min(2).max(200).allow(null, ''),
+    name: Joi.string().min(2).max(100).required(),
+    email: Joi.string().min(2).max(100).email().required(),
+    phone: Joi.string().min(9).max(20).required(),
+    password: Joi.string().min(2).max(100).required(),
+    address: Joi.string().min(2).max(200).allow(null, ''),
   })
   return joiSchema.validate(_bodyUser);
 }

@@ -24,4 +24,6 @@ router.delete("/:id", authToken, authAdminToken , userController.deleteUser);
 
 router.put("/:id", authToken, authAdminToken, userController.editUser);
 
+router.post("/:role",authToken,authAdminToken, userController.createUserAsAdmin);
+
 module.exports = router;
