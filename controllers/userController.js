@@ -90,3 +90,20 @@ exports.userInfo = async (req, res) => {
     res.status(400).send(err);
   }
 }
+
+exports.deleteUser = async (req, res) => {
+  let id = req.params.id;
+  try {
+    if (id != id) {
+      let data = await UserModel.deleteOne({ _id: id });
+      return res.json(data);
+    }
+    else {
+      return res.json({ message: "can't delete your own user" })
+    }
+  }
+  catch (err) {
+    console.log(err);
+    res.status(400).send(err)
+  }
+}

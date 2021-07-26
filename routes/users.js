@@ -20,4 +20,6 @@ router.get('/single/:id', userController.singleUser);
 
 router.get("/myInfo",authToken , userController.userInfo);
 
+router.delete("/:id", authToken, authAdminToken , userController.deleteUser);
+
 module.exports = router;
