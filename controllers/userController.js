@@ -53,14 +53,15 @@ exports.loginUser = async (req, res) => {
 }
 
 exports.checkIfAdmin = async (req, res) => {
-  const role = req.userData.role;
-  res.json({ auth: role });
+  const user = await UserModel.findOne({_id:req.userData._id})
+  res.json({ role: user.role });
 }
 
 //get list of users for admin panel
 exports.usersList = async (req, res) => {
   try {
-    if(req.userData.role !== "admin") return res.status(400).json({ message: "You have to be an admin" });
+    const user = await UserModel.findOne({_id:req.userData._id})
+    if(user.role !== "admin") return res.status(400).json({ message: "You have to be an admin" });
     const data = await UserModel.find({}, { pass: 0 })
     res.json(data);
   }
@@ -97,8 +98,9 @@ exports.userInfo = async (req, res) => {
 exports.deleteUser = async (req, res) => {
   const id = req.params.id;
   try {
-    if(req.userData.role !== "admin") return res.status(400).json({ message: "You have to be an admin" });
-    if (id != id) {
+    const user = await UserModel.findOne({_id:req.userData._id})
+    if(user.role !== "admin") return res.status(400).json({ message: "You have to be an admin" });
+    if (id != user._id) {
       const data = await UserModel.deleteOne({ _id: id });
       return res.json(data);
     }
@@ -117,7 +119,8 @@ exports.editUser = async (req, res) => {
   const validBody = validEditUser(req.body);
   if (validBody.error) return res.status(400).json(validBody.error.details);
   try {
-    if(req.userData.role !== "admin") return res.status(400).json({ message: "You have to be an admin" });
+    const user = await UserModel.findOne({_id:req.userData._id})
+    if(user.role !== "admin") return res.status(400).json({ message: "You have to be an admin" });
     const data = await UserModel.updateOne({ _id: req.params.id }, req.body);
     res.status(201).json(data);
   }
@@ -133,13 +136,14 @@ exports.createUserAsAdmin = async (req, res) => {
     return res.status(400).json(validBody.error.details);
   }
   try {
-    if(req.userData.role !== "admin") return res.status(400).json({ message: "You have to be an admin" });
+    let user = await UserModel.findOne({_id:req.userData._id})
+    if(user.role !== "admin") return res.status(400).json({ message: "You have to be an admin" });
     const roleName = req.params.role;
     const role = await RoleModel.findOne({roleName});
     if(!role || roleName === "customer"){
       return res.status(400).json({ message: "invalid role" });
     }
-    let user = new UserModel(req.body);
+    user = new UserModel(req.body);
     user.role = roleName;
     user.isValidEmail = true;
     const salt = await bcrypt.genSalt(10);
