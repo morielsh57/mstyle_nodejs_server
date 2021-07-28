@@ -20,6 +20,8 @@ router.get('/single/:id', userController.singleUser);
 
 router.get("/myInfo",authToken , userController.userInfo);
 
+router.get("/customerAmount",authToken, authAdminToken , userController.customersAmount);
+
 router.delete("/:id", authToken, authAdminToken , userController.deleteUser);
 
 router.put("/:id", authToken, authAdminToken, userController.editUser);
