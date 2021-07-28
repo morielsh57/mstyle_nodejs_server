@@ -13,6 +13,7 @@ let userSchema = new mongoose.Schema({
   },
   phone: String,
   address: String,
+  avatar: String,
   isValidEmail: {
     type: Boolean, default: false
   },
@@ -35,6 +36,7 @@ exports.validUser = (_bodyUser) => {
     phone: Joi.string().min(9).max(20).required(),
     password: Joi.string().min(2).max(100).required(),
     address: Joi.string().min(2).max(200).allow(null, ''),
+    avatar: Joi.string().min(2).max(200).allow(null, ''),
   })
   return joiSchema.validate(_bodyUser);
 }
