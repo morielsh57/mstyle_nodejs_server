@@ -15,4 +15,6 @@ router.delete("/:id", authToken,authAdminToken , productController.deleteProduct
 
 router.put("/:id", authToken,authAdminToken, productController.editProduct);
 
+router.put("/editMany/:id", authToken,authAdminToken, productController.editManyProduct);
+
 module.exports = router;
