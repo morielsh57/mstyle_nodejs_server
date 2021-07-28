@@ -95,6 +95,17 @@ exports.userInfo = async (req, res) => {
   }
 }
 
+exports.customersAmount = async (req, res) => {
+  try {
+    let data = await UserModel.countDocuments({role:"customer"});
+    res.json(data);
+  }
+  catch (err) {
+    console.log(err);
+    res.status(400).json(err);
+  }
+}
+
 exports.deleteUser = async (req, res) => {
   const id = req.params.id;
   try {
