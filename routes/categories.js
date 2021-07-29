@@ -7,6 +7,8 @@ router.get("/", categoryController.catList);
 
 router.get('/single/:shortID', categoryController.singleCategory);
 
+router.get('/count', categoryController.categoryAmount);
+
 router.post("/", authToken,authAdminToken, categoryController.createCategory);
 
 router.put("/:shortID", authToken,authAdminToken, categoryController.editCategory);

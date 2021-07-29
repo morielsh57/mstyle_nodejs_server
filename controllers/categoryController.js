@@ -29,6 +29,17 @@ exports.singleCategory = async (req, res) => {
   }
 }
 
+exports.categoryAmount = async (req, res) => {
+  try {
+    const data = await CategoryModel.countDocuments({});
+    res.json({ count: data });
+  }
+  catch (err) {
+    console.log(err);
+    res.status(500).json(err);
+  }
+}
+
 //create new category
 exports.createCategory = async(req,res) => {
   const validBody = validCategory(req.body);
