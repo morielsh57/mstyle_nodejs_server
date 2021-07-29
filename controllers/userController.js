@@ -2,7 +2,6 @@ const bcrypt = require("bcrypt");
 const _ = require("lodash");
 const { RoleModel } = require("../models/roleModel");
 const { UserModel, validUser, validLogin, genToken,sendEmail, validEditUser } = require("../models/userModel");
-const { use } = require("../routes/users");
 
 exports.createUser = async (req, res) => {
   const validBody = validUser(req.body);
