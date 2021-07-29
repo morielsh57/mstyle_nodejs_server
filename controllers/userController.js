@@ -59,6 +59,8 @@ exports.checkIfAdmin = async (req, res) => {
 
 //get list of users for admin panel
 exports.usersList = async (req, res) => {
+  const perPage = (req.query.perPage) ? Number(req.query.perPage) : 5; //if perPage not mentioned (?perPage=x) the default: 5
+  const page = (req.query.page) ? Number(req.query.page) : 0; //optional (?page=x), default: 0
   const filterRole = (req.query.role) ? { role: req.query.role } : {};
   try {
     const user = await UserModel.findOne({_id:req.userData._id})
@@ -68,6 +70,9 @@ exports.usersList = async (req, res) => {
       if(!role) return res.status(400).json({ message: "Invalid role" });
     }
     const data = await UserModel.find(filterRole, { password: 0 })
+    .sort({_id:-1})
+    .limit(perPage)
+    .skip(page * perPage);
     res.json(data);
   }
   catch (err) {
