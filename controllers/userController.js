@@ -59,10 +59,15 @@ exports.checkIfAdmin = async (req, res) => {
 
 //get list of users for admin panel
 exports.usersList = async (req, res) => {
+  const filterRole = (req.query.role) ? { role: req.query.role } : {};
   try {
     const user = await UserModel.findOne({_id:req.userData._id})
     if(user.role !== "admin") return res.status(400).json({ message: "You have to be an admin" });
-    const data = await UserModel.find({}, { pass: 0 })
+     if(filterRole.role){
+      role = await RoleModel.findOne({roleName:filterRole.role});
+      if(!role) return res.status(400).json({ message: "Invalid role" });
+    }
+    const data = await UserModel.find(filterRole, { password: 0 })
     res.json(data);
   }
   catch (err) {
@@ -73,7 +78,7 @@ exports.usersList = async (req, res) => {
 
 exports.singleUser = async (req, res) => {
   try {
-    const data = await UserModel.findOne({ _id: req.params.id }, { pass: 0, email: 0 })
+    const data = await UserModel.findOne({ _id: req.params.id }, { password: 0, email: 0 })
     res.json(data);
   }
   catch (err) {
@@ -86,7 +91,7 @@ exports.singleUser = async (req, res) => {
 exports.userInfo = async (req, res) => {
   try {
     // req.userData -> from the middleware authToken in the route "/myInfo"
-    const user = await UserModel.findOne({ _id: req.userData._id }, { pass: 0 });
+    const user = await UserModel.findOne({ _id: req.userData._id }, { password: 0 });
     res.json(user);
   }
   catch (err) {
