@@ -16,6 +16,8 @@ router.post("/checkAdmin",authToken,authAdminToken, userController.checkIfAdmin)
 
 router.get('/usersList',authToken,authAdminToken, userController.usersList);
 
+router.get('/count',authToken,authAdminToken, userController.userAmount);
+
 router.get('/single/:id', userController.singleUser);
 
 router.get("/myInfo",authToken , userController.userInfo);

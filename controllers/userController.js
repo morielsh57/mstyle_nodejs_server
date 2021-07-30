@@ -1,7 +1,7 @@
 const bcrypt = require("bcrypt");
 const _ = require("lodash");
 const { RoleModel } = require("../models/roleModel");
-const { UserModel, validUser, validLogin, genToken,sendEmail, validEditUser } = require("../models/userModel");
+const { UserModel, validUser, validLogin, genToken, sendEmail, validEditUser } = require("../models/userModel");
 
 exports.createUser = async (req, res) => {
   const validBody = validUser(req.body);
@@ -14,7 +14,7 @@ exports.createUser = async (req, res) => {
     user.password = await bcrypt.hash(user.password, salt);
     await user.save();
     sendEmail(user.email, user._id);
-    res.status(201).json({message:"verify your email"});
+    res.status(201).json({ message: "verify your email" });
   }
   catch (err) {
     console.log(err);
@@ -35,7 +35,7 @@ exports.loginUser = async (req, res) => {
     if (!user) {
       return res.status(400).json({ message: "Username or password is incorrect" });
     }
-    if(!user.isValidEmail){
+    if (!user.isValidEmail) {
       return res.status(400).json({ message: "Please verify your email, before you login" });
     }
     const validPass = await bcrypt.compare(req.body.password, user.password);
@@ -52,7 +52,7 @@ exports.loginUser = async (req, res) => {
 }
 
 exports.checkIfAdmin = async (req, res) => {
-  const user = await UserModel.findOne({_id:req.userData._id})
+  const user = await UserModel.findOne({ _id: req.userData._id })
   res.json({ role: user.role });
 }
 
@@ -62,21 +62,36 @@ exports.usersList = async (req, res) => {
   const page = (req.query.page) ? Number(req.query.page) : 0; //optional (?page=x), default: 0
   const filterRole = (req.query.role) ? { role: req.query.role } : {};
   try {
-    const user = await UserModel.findOne({_id:req.userData._id})
-    if(user.role !== "admin") return res.status(400).json({ message: "You have to be an admin" });
-     if(filterRole.role){
-      role = await RoleModel.findOne({roleName:filterRole.role});
-      if(!role) return res.status(400).json({ message: "Invalid role" });
+    const user = await UserModel.findOne({ _id: req.userData._id })
+    if (user.role !== "admin") return res.status(400).json({ message: "You have to be an admin" });
+    if (filterRole.role) {
+      let role = await RoleModel.findOne({ roleName: filterRole.role });
+      if (!role) return res.status(400).json({ message: "Invalid role" });
     }
     const data = await UserModel.find(filterRole, { password: 0 })
-    .sort({_id:-1})
-    .limit(perPage)
-    .skip(page * perPage);
+      .sort({ _id: -1 })
+      .limit(perPage)
+      .skip(page * perPage);
     res.json(data);
   }
   catch (err) {
     console.log(err);
     res.status(500).send(err);
+  }
+}
+
+
+exports.userAmount = async (req, res) => {
+  const filterRole = (req.query.role) ? { role: req.query.role } : {};
+  try {
+    let role = await RoleModel.findOne({ roleName: filterRole.role });
+    if (!role) return res.status(400).json({ message: "Invalid role" });
+    const data = await UserModel.countDocuments(filterRole);
+    res.json({ count: data });
+  }
+  catch (err) {
+    console.log(err);
+    res.status(500).json(err);
   }
 }
 
@@ -106,7 +121,7 @@ exports.userInfo = async (req, res) => {
 
 exports.customersAmount = async (req, res) => {
   try {
-    let data = await UserModel.countDocuments({role:"customer"});
+    let data = await UserModel.countDocuments({ role: "customer" });
     res.json(data);
   }
   catch (err) {
@@ -118,8 +133,8 @@ exports.customersAmount = async (req, res) => {
 exports.deleteUser = async (req, res) => {
   const id = req.params.id;
   try {
-    const user = await UserModel.findOne({_id:req.userData._id})
-    if(user.role !== "admin") return res.status(400).json({ message: "You have to be an admin" });
+    const user = await UserModel.findOne({ _id: req.userData._id })
+    if (user.role !== "admin") return res.status(400).json({ message: "You have to be an admin" });
     if (id != user._id) {
       const data = await UserModel.deleteOne({ _id: id });
       return res.json(data);
@@ -139,8 +154,8 @@ exports.editUser = async (req, res) => {
   const validBody = validEditUser(req.body);
   if (validBody.error) return res.status(400).json(validBody.error.details);
   try {
-    const user = await UserModel.findOne({_id:req.userData._id})
-    if(user.role !== "admin") return res.status(400).json({ message: "You have to be an admin" });
+    const user = await UserModel.findOne({ _id: req.userData._id })
+    if (user.role !== "admin") return res.status(400).json({ message: "You have to be an admin" });
     const data = await UserModel.updateOne({ _id: req.params.id }, req.body);
     res.status(201).json(data);
   }
@@ -156,11 +171,11 @@ exports.createUserAsAdmin = async (req, res) => {
     return res.status(400).json(validBody.error.details);
   }
   try {
-    let user = await UserModel.findOne({_id:req.userData._id})
-    if(user.role !== "admin") return res.status(400).json({ message: "You have to be an admin" });
+    let user = await UserModel.findOne({ _id: req.userData._id })
+    if (user.role !== "admin") return res.status(400).json({ message: "You have to be an admin" });
     const roleName = req.params.role;
-    const role = await RoleModel.findOne({roleName});
-    if(!role || roleName === "customer"){
+    const role = await RoleModel.findOne({ roleName });
+    if (!role || roleName === "customer") {
       return res.status(400).json({ message: "invalid role" });
     }
     user = new UserModel(req.body);
@@ -169,7 +184,7 @@ exports.createUserAsAdmin = async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     user.password = await bcrypt.hash(user.password, salt);
     await user.save();
-    res.status(201).json(_.pick(user, ["name","role","_id", "email", "phone", "address", "date_created",]));
+    res.status(201).json(_.pick(user, ["name", "role", "_id", "email", "phone", "address", "date_created",]));
   }
   catch (err) {
     console.log(err);
