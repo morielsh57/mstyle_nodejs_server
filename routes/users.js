@@ -16,15 +16,17 @@ router.post("/checkAdmin",authToken,authAdminToken, userController.checkIfAdmin)
 
 router.get('/usersList',authToken,authAdminToken, userController.usersList);
 
-router.get('/count',authToken,authAdminToken, userController.userAmount);
+router.get('/count', userController.userAmount);
 
-router.get('/single/:id', userController.singleUser);
+router.get('/single/:id',authToken, userController.singleUser);
 
 router.get("/myInfo",authToken , userController.userInfo);
 
 router.get("/customerAmount",authToken, authAdminToken , userController.customersAmount);
 
 router.delete("/:id", authToken, authAdminToken , userController.deleteUser);
+
+router.put("/editProfile/:id", authToken, authAdminToken, userController.editUserProfile);
 
 router.put("/:id", authToken, authAdminToken, userController.editUser);
 

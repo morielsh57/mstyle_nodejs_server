@@ -97,7 +97,7 @@ exports.userAmount = async (req, res) => {
 
 exports.singleUser = async (req, res) => {
   try {
-    const data = await UserModel.findOne({ _id: req.params.id }, { password: 0, email: 0 })
+    const data = await UserModel.findOne({ _id: req.params.id }, { password: 0 })
     res.json(data);
   }
   catch (err) {
@@ -150,7 +150,7 @@ exports.deleteUser = async (req, res) => {
 }
 
 //can edit just the name, phone, address.
-exports.editUser = async (req, res) => {
+exports.editUserProfile = async (req, res) => {
   const validBody = validUser(req.body);
   if (validBody.error) return res.status(400).json(validBody.error.details);
   try {
@@ -158,6 +158,21 @@ exports.editUser = async (req, res) => {
     if (user.role !== "admin") return res.status(400).json({ message: "You have to be an admin" });
     const salt = await bcrypt.genSalt(10);
     req.body.password = await bcrypt.hash(user.password, salt);
+    const data = await UserModel.updateOne({ _id: req.params.id }, req.body);
+    res.status(201).json(data);
+  }
+  catch (err) {
+    console.log(err);
+    res.status(500).send(err);
+  }
+}
+
+exports.editUser = async (req, res) => {
+  const validBody = validEditUser(req.body);
+  if (validBody.error) return res.status(400).json(validBody.error.details);
+  try {
+    const user = await UserModel.findOne({ _id: req.userData._id })
+    if (user.role !== "admin") return res.status(400).json({ message: "You have to be an admin" });
     const data = await UserModel.updateOne({ _id: req.params.id }, req.body);
     res.status(201).json(data);
   }

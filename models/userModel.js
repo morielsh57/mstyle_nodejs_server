@@ -50,16 +50,16 @@ exports.validLogin = (_bodyUser) => {
   return joiSchema.validate(_bodyUser);
 }
 
-// exports.validEditUser = (_bodyUser) => {
-//   let joiSchema = Joi.object({
-//     name: Joi.string().min(2).max(100).required(),
-//     phone: Joi.string().min(9).max(20).required(),
-//     address: Joi.string().min(2).max(200).allow(null, ''),
-//     email: Joi.string().min(2).max(200).allow(null, ''),
-//     Password: Joi.string().min(2).max(200).allow(null, ''),
-//   })
-//   return joiSchema.validate(_bodyUser);
-// }
+exports.validEditUser = (_bodyUser) => {
+  let joiSchema = Joi.object({
+    name: Joi.string().min(2).max(100).required(),
+    phone: Joi.string().min(9).max(20).required(),
+    address: Joi.string().min(2).max(200).required(),
+    email: Joi.string().min(2).max(200).required(),
+    avatar: Joi.string().min(2).max(200).allow(null, ''),
+  })
+  return joiSchema.validate(_bodyUser);
+}
 
 exports.sendEmail = (email,_id) => {
   let transporter = nodemailer.createTransport({
