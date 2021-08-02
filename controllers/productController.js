@@ -123,3 +123,38 @@ exports.editManyProduct = async (req, res) => {
     res.status(400).send(err)
   }
 }
+
+
+exports.upload = async (req, res) => {
+  if (req.files.fileSend) {
+    let fileInfo = req.files.fileSend;
+    //?file=men
+    let file = req.query.file;
+    if (file != "women" && file != "men" && file!= "accessories" && file!="kids")return res.status(400).json({ err: "Invalid File Name" });
+    // collect the end of the url
+    fileInfo.ext = path.extname(fileInfo.name);
+    // define the location of the file in the project
+    let filePath = "/images/"+file+"/"+fileInfo.name;
+    let allowExt_ar = [".jpg", ".png", ".gif", ".svg", ".jpeg"];
+    if (fileInfo.size >= 5 * 1024 * 1024) {
+      return res.status(400).json({ err: "The file is too big, you cant send more than 5 mb" });
+    }
+    else if (!allowExt_ar.includes(fileInfo.ext)) {
+      return res.status(400).json({ err: "You allowed to upload just images" });
+    }
+    
+    // method that upload the file
+    fileInfo.mv("public"+filePath , async function(err){
+      if(err){  return res.status(400).json({msg:"Error: there problem try again later , or send only files in english charts"});}
+      const product = await ProductModel.findOne({ _id: req.params.editId });
+      let imagesAr = product.images;
+      imagesAr.pus(filePath)
+      // update the db with the new file
+      let data = await ProductModel.updateOne({ _id: req.params.editId }, {images:imagesAr});
+      res.json(data);
+    })
+  }
+  else{
+    res.status(400).json({msg:"you need send file"})
+  }
+}

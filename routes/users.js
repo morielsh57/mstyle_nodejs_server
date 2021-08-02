@@ -32,4 +32,6 @@ router.put("/:id", authToken, authAdminToken, userController.editUser);
 
 router.post("/:role",authToken,authAdminToken, userController.createUserAsAdmin);
 
+router.put("/upload/:editId", authToken,authAdminToken ,userController.upload);
+
 module.exports = router;

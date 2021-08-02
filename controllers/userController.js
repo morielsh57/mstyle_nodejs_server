@@ -1,5 +1,6 @@
 const bcrypt = require("bcrypt");
 const _ = require("lodash");
+const path = require("path");
 const { RoleModel } = require("../models/roleModel");
 const { UserModel, validUser, validLogin, genToken, sendEmail, validEditUser } = require("../models/userModel");
 
@@ -206,5 +207,34 @@ exports.createUserAsAdmin = async (req, res) => {
   catch (err) {
     console.log(err);
     res.status(500).send(err);
+  }
+}
+
+exports.upload = async (req, res) => {
+  if (req.files.fileSend) {
+    let fileInfo = req.files.fileSend;
+    // collect the end of the url
+    fileInfo.ext = path.extname(fileInfo.name);
+    // define the location of the file in the project
+    let filePath = "/images/avatar/"+fileInfo.name;
+    let allowExt_ar = [".jpg", ".png", ".gif", ".svg", ".jpeg"];
+    if (fileInfo.size >= 5 * 1024 * 1024) {
+      return res.status(400).json({ err: "The file is too big, you cant send more than 5 mb" });
+    }
+    else if (!allowExt_ar.includes(fileInfo.ext)) {
+      return res.status(400).json({ err: "You allowed to upload just images" });
+    }
+    
+    // method that upload the file
+    fileInfo.mv("public"+filePath , async function(err){
+      if(err){  return res.status(400).json({msg:"Error: there problem try again later , or send only files in english charts"});}
+
+      // update the db with the new file
+      let data = await UserModel.updateOne({ _id: req.params.editId }, {avatar:filePath});
+      res.json(data);
+    })
+  }
+  else{
+    res.status(400).json({msg:"you need send file"})
   }
 }

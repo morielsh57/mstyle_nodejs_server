@@ -17,4 +17,6 @@ router.put("/:id", authToken,authAdminToken, productController.editProduct);
 
 router.put("/editMany/:id", authToken,authAdminToken, productController.editManyProduct);
 
+router.put("/upload/:editId", authToken,authAdminToken ,productController.upload);
+
 module.exports = router;
