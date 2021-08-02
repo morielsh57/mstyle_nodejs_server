@@ -5,14 +5,16 @@ const { random } = require("lodash");
 
 const categorySchema = new mongoose.Schema({
   shortID:Number,
-  name:String
+  mainCategory:String,
+  subCategory:String
 })
 
 exports.CategoryModel = mongoose.model("categories",categorySchema);
 
 exports.validCategory = (_bodyData) => {
   let joiSchema = Joi.object({
-    name:Joi.string().min(2).max(100).required()
+    mainCategory:Joi.string().min(2).max(100).required(),
+    subCategory:Joi.string().min(2).max(100).allow(null, '')
   })
   return joiSchema.validate(_bodyData);
 }

@@ -1,5 +1,7 @@
 const { ProductModel, validProduct, generateCatalogNum } = require("../models/productModel");
 const { UserModel } = require("../models/userModel");
+const path = require("path");
+const { CategoryModel } = require("../models/categoryModel");
 
 //retrun list of products:
 exports.productsList = async (req, res) => {
@@ -7,15 +9,29 @@ exports.productsList = async (req, res) => {
   const page = (req.query.page) ? Number(req.query.page) : 0; //optional (?page=x), default: 0
   const sortQ = (req.query.sort) ? req.query.sort : "_id"; //sort by item - optional (?sort=?), default: sort by _id
   const ifReverse = (req.query.reverse) ? -1 : 1; //if ?reverse=true, ifReverse=-1 else default:1
-  //check if query of category is received, if so, a category filter will work
-  const filterCat = (req.query.cat) ? { category_s_id: req.query.cat } : {};
 
   try {
-    const data = await ProductModel.find(filterCat)
-      .sort({ [sortQ]: ifReverse })
-      .limit(perPage)
-      .skip(page * perPage)
-    res.json(data);
+    //?mainCategory=Men(optional)
+    if (req.query.mainCategory) {
+      const categories = await CategoryModel.find({ mainCategory: req.query.mainCategory });
+      if (!categories || categories.length == 0) return res.status(400).json({ message: "Category not found" });
+      let categoryID_ar = [];
+      for (let i = 0; i < categories.length; i++) {
+        categoryID_ar.push(categories[i].shortID);
+      }
+      const data = await ProductModel.find({ categoryID: { $in: categoryID_ar } })
+        .sort({ [sortQ]: ifReverse })
+        .limit(perPage)
+        .skip(page * perPage)
+      res.json(data);
+    }
+    else {
+      const data = await ProductModel.find({})
+        .sort({ [sortQ]: ifReverse })
+        .limit(perPage)
+        .skip(page * perPage)
+      res.json(data);
+    }
   }
   catch (err) {
     console.log(err);
@@ -25,11 +41,21 @@ exports.productsList = async (req, res) => {
 
 //Will return how many products there are in total and can give how many products there are from a particular category
 exports.productsAmount = async (req, res) => {
-  const filterCat = (req.query.cat) ? { category_s_id: req.query.cat } : {};
   try {
-    //filter -> the query
-    const data = await ProductModel.countDocuments(filterCat);
-    res.json({ count: data });
+    if (req.query.mainCategory) {
+      const categories = await CategoryModel.find({ mainCategory: req.query.mainCategory });
+      if (!categories || categories.length == 0) return res.status(400).json({ message: "Category not found" });
+      let categoryID_ar = [];
+      for (let i = 0; i < categories.length; i++) {
+        categoryID_ar.push(categories[i].shortID);
+      }
+      const data = await ProductModel.countDocuments({ categoryID: { $in: categoryID_ar } })
+      res.json({ count: data });
+    }
+    else {
+      const data = await ProductModel.countDocuments(filterCat);
+      res.json({ count: data });
+    }
   }
   catch (err) {
     console.log(err);
@@ -54,10 +80,9 @@ exports.createProduct = async (req, res) => {
     return res.status(400).json(validBody.error.details);
   }
   try {
-    let user = await UserModel.findOne({_id:req.userData._id})
-    if(user.role !== "supplier") return res.status(400).json({ message: "You have to be a supplier" });
+    let user = await UserModel.findOne({ _id: req.userData._id })
     let product = new ProductModel(req.body);
-    product.supplierID = user._id;
+    if (user.role === "supplier") product.supplierID = user._id;
     product.catalogNumber = await generateCatalogNum();
     await product.save();
     res.status(201).json(product);
@@ -71,8 +96,8 @@ exports.createProduct = async (req, res) => {
 exports.deleteProduct = async (req, res) => {
   try {
     const product = await ProductModel.findOne({ _id: req.params.id });
-    let user = await UserModel.findOne({_id:req.userData._id})
-    if(user.role == "supplier" && user._id != product.supplierID){
+    let user = await UserModel.findOne({ _id: req.userData._id })
+    if (user.role == "supplier" && user._id != product.supplierID) {
       return res.status(400).json({ message: "Error permission" });
     }
     let data = await ProductModel.deleteOne({ _id: req.params.id });
@@ -91,8 +116,8 @@ exports.editProduct = async (req, res) => {
   }
   try {
     const product = await ProductModel.findOne({ _id: req.params.id });
-    let user = await UserModel.findOne({_id:req.userData._id})
-    if(user.role == "supplier" && user._id != product.supplierID){
+    let user = await UserModel.findOne({ _id: req.userData._id })
+    if (user.role == "supplier" && user._id != product.supplierID) {
       return res.status(400).json({ message: "Error permission" });
     }
     let data = await ProductModel.updateOne({ _id: req.params.id }, req.body)
@@ -111,8 +136,8 @@ exports.editManyProduct = async (req, res) => {
   }
   try {
     const product = await ProductModel.findOne({ _id: req.params.id });
-    let user = await UserModel.findOne({_id:req.userData._id})
-    if(user.role == "supplier" && user._id != product.supplierID){
+    let user = await UserModel.findOne({ _id: req.userData._id })
+    if (user.role == "supplier" && user._id != product.supplierID) {
       return res.status(400).json({ message: "Error permission" });
     }
     let data = await ProductModel.updateMany({ name: product.name }, req.body);
@@ -130,31 +155,37 @@ exports.upload = async (req, res) => {
     let fileInfo = req.files.fileSend;
     //?file=men
     let file = req.query.file;
-    if (file != "women" && file != "men" && file!= "accessories" && file!="kids")return res.status(400).json({ err: "Invalid File Name" });
-    // collect the end of the url
-    fileInfo.ext = path.extname(fileInfo.name);
-    // define the location of the file in the project
-    let filePath = "/images/"+file+"/"+fileInfo.name;
-    let allowExt_ar = [".jpg", ".png", ".gif", ".svg", ".jpeg"];
-    if (fileInfo.size >= 5 * 1024 * 1024) {
-      return res.status(400).json({ err: "The file is too big, you cant send more than 5 mb" });
-    }
-    else if (!allowExt_ar.includes(fileInfo.ext)) {
-      return res.status(400).json({ err: "You allowed to upload just images" });
-    }
-    
-    // method that upload the file
-    fileInfo.mv("public"+filePath , async function(err){
-      if(err){  return res.status(400).json({msg:"Error: there problem try again later , or send only files in english charts"});}
-      const product = await ProductModel.findOne({ _id: req.params.editId });
-      let imagesAr = product.images;
-      imagesAr.pus(filePath)
-      // update the db with the new file
-      let data = await ProductModel.updateOne({ _id: req.params.editId }, {images:imagesAr});
-      res.json(data);
-    })
+    if (file != "women" && file != "men" && file != "accessories" && file != "kids") return res.status(400).json({ err: "Invalid File Name" });
+    const product = await ProductModel.findOne({ _id: req.params.editId });
+    let imagesAr = product.images;
+    for (let i = 0; i < fileInfo.length; i++) {
+      console.log(fileInfo[i]);
+      // collect the end of the url
+      fileInfo[i].ext = path.extname(fileInfo[i].name);
+      // define the location of the file in the project
+      let filePath = "/images/" + file + "/" + fileInfo[i].name;
+      let allowExt_ar = [".jpg", ".png", ".gif", ".svg", ".jpeg"];
+      if (fileInfo[i].size >= 5 * 1024 * 1024) {
+        return res.status(400).json({ err: "The file is too big, you cant send more than 5 mb" });
+      }
+      if (!allowExt_ar.includes(fileInfo[i].ext)) {
+        return res.status(400).json({ err: "You allowed to upload just images" });
+      }
+
+      // method that upload the file
+      fileInfo[i].mv("public" + filePath, async function (err) {
+        if (err) { return res.status(400).json({ msg: "Error: there problem try again later , or send only files in english charts" }); }
+        imagesAr.push(filePath);
+        // update the db with the new file
+        if (i === fileInfo.length - 1) {
+          let data = await ProductModel.updateOne({ _id: req.params.editId }, { images: imagesAr });
+          res.json(data);
+        }
+      })
+    };
+
   }
-  else{
-    res.status(400).json({msg:"you need send file"})
+  else {
+    res.status(400).json({ msg: "you need send file" })
   }
 }
