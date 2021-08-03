@@ -109,6 +109,27 @@ exports.deleteProduct = async (req, res) => {
   }
 }
 
+exports.deleteOneImage = async (req, res) => {
+  try {
+    const user = await UserModel.findOne({ _id: req.userData._id })
+    if (user.role !== "admin") {
+      return res.status(400).json({ message: "Error permission" });
+    }
+    const i = req.params.indx;
+    const product = await ProductModel.findOne({ _id: req.params.id });
+    let image_ar = product.images;
+    console.log(image_ar);
+    image_ar.splice(i, 1);
+    console.log(image_ar);
+    let data = await ProductModel.updateOne({ _id: req.params.id }, { images: image_ar });
+    res.json(data);
+  }
+  catch (err) {
+    console.log(err);
+    res.status(400).send(err)
+  }
+}
+
 exports.editProduct = async (req, res) => {
   let validBody = validProduct(req.body);
   if (validBody.error) {

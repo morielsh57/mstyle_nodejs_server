@@ -13,6 +13,8 @@ router.post("/", authToken,authAdminToken ,productController.createProduct);
 
 router.delete("/:id", authToken,authAdminToken , productController.deleteProduct);
 
+router.put("/delOneImage/:id/:indx", authToken,authAdminToken , productController.deleteOneImage);
+
 router.put("/:id", authToken,authAdminToken, productController.editProduct);
 
 router.put("/editMany/:id", authToken,authAdminToken, productController.editManyProduct);
