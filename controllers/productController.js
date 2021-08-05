@@ -1,3 +1,4 @@
+const _ = require("lodash");
 const { ProductModel, validProduct, generateCatalogNum } = require("../models/productModel");
 const { UserModel } = require("../models/userModel");
 const path = require("path");
@@ -39,6 +40,41 @@ exports.productsList = async (req, res) => {
   }
 }
 
+exports.basicDataList = async (req, res) => {
+  const perPage = (req.query.perPage) ? Number(req.query.perPage) : 15; //if perPage not mentioned (?perPage=x) the default: 15
+  const page = (req.query.page) ? Number(req.query.page) : 0; //optional (?page=x), default: 0
+  const sortQ = (req.query.sort) ? req.query.sort : "_id"; //sort by item - optional (?sort=?), default: sort by _id
+  const ifReverse = (req.query.reverse) ? -1 : 1; //if ?reverse=true, ifReverse=-1 else default:1
+
+  try {
+    //?mainCategory=Men(optional)
+    if (req.query.mainCategory) {
+      const categories = await CategoryModel.find({ mainCategory: req.query.mainCategory });
+      if (!categories || categories.length == 0) return res.status(400).json({ message: "Category not found" });
+      let categoryID_ar = [];
+      for (let i = 0; i < categories.length; i++) {
+        categoryID_ar.push(categories[i].shortID);
+      }
+      const data = await ProductModel.find({ categoryID: { $in: categoryID_ar }, size:2 },{name:1,price:1,images:1,categoryID:1,color:1,size:1,_id:1})
+        .sort({ [sortQ]: ifReverse })
+        .limit(perPage)
+        .skip(page * perPage)
+      res.json(data);
+    }
+    else {
+      const data = await ProductModel.find({size: 2},{name:1,price:1,images:1,categoryID:1,color:1,size:1,_id:1})
+        .sort({ [sortQ]: ifReverse })
+        .limit(perPage)
+        .skip(page * perPage)
+      res.json(data);
+    }
+  }
+  catch (err) {
+    console.log(err);
+    res.status(500).send(err);
+  }
+}
+
 //Will return how many products there are in total and can give how many products there are from a particular category
 exports.productsAmount = async (req, res) => {
   try {
@@ -49,11 +85,11 @@ exports.productsAmount = async (req, res) => {
       for (let i = 0; i < categories.length; i++) {
         categoryID_ar.push(categories[i].shortID);
       }
-      const data = await ProductModel.countDocuments({ categoryID: { $in: categoryID_ar } })
+      const data = await ProductModel.countDocuments({ categoryID: { $in: categoryID_ar },size: 2 })
       res.json({ count: data });
     }
     else {
-      const data = await ProductModel.countDocuments(filterCat);
+      const data = await ProductModel.countDocuments({size: 2});
       res.json({ count: data });
     }
   }

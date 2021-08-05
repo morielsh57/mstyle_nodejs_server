@@ -5,6 +5,8 @@ const productController = require('../controllers/productController')
 
 router.get("/", productController.productsList);
 
+router.get("/basicData", productController.basicDataList);
+
 router.get("/count", productController.productsAmount);
 
 router.get('/single/:id', productController.singleProduct);
