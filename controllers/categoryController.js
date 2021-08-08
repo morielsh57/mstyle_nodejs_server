@@ -25,7 +25,7 @@ exports.singleCategory = async (req, res) => {
   }
   catch (err) {
       console.log(err);
-      res.status(400).send(err);
+      res.status(500).send(err);
   }
 }
 
@@ -70,7 +70,7 @@ exports.editCategory =  async(req,res) => {
   } 
   catch(err){
     console.log(err);
-    res.status(400).send(err)
+    res.status(500).send(err)
   } 
 }
 
@@ -81,6 +81,6 @@ exports.deleteCategory = async(req,res) => {
   }
   catch(err){
     console.log(err);
-    res.status(400).send(err)
+    res.status(500).send(err)
   } 
 }

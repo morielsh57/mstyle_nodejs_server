@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@hapi/joi": "^15.0.3",
     "axios": "^0.21.1",
     "bcrypt": "^5.0.1",
     "express": "^4.17.1",
