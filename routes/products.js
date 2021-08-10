@@ -13,6 +13,8 @@ router.get("/count", productController.productsAmount);
 
 router.get('/search', productController.search);
 
+router.get('/search/amount', productController.amountOfResultSearch);
+
 router.get('/single/:id', productController.singleProduct);
 
 router.get('/singlebyName', productController.singleByNameAndColor);

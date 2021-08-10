@@ -132,14 +132,27 @@ exports.productsAmount = async (req, res) => {
 
 exports.search = async (req, res) => {
   let searchQ = req.query.q;
-  let searchRexExp = new RegExp(searchQ,"i");
+  let searchRexExp = new RegExp(searchQ, "i");
   let perPage = (req.query.perPage) ? Number(req.query.perPage) : 5; //if perPage not mentioned (?perPage=x) the default: 5
   let page = (req.query.page) ? Number(req.query.page) : 0; //optional (?page=x), default: 0
   try {
-    const data = await ProductModel.find({$or:[{name:searchRexExp},{description:searchRexExp},{tags:searchRexExp}]})
-    .limit(perPage)
-    .skip(page * perPage)
+    const data = await ProductModel.find({ $or: [{ name: searchRexExp }, { description: searchRexExp }, { tags: searchRexExp }, { color: searchRexExp }], size: 2 })
+      .limit(perPage)
+      .skip(page * perPage)
     res.json(data);
+  }
+  catch (err) {
+    console.log(err);
+    res.status(500).send(err);
+  }
+}
+
+exports.amountOfResultSearch = async (req, res) => {
+  let searchQ = req.query.q;
+  let searchRexExp = new RegExp(searchQ, "i");
+  try {
+    const data = await ProductModel.countDocuments({ $or: [{ name: searchRexExp }, { description: searchRexExp }, { tags: searchRexExp }, { color: searchRexExp }], size: 2 })
+    res.json({ count: data });
   }
   catch (err) {
     console.log(err);
@@ -163,7 +176,7 @@ exports.singleByNameAndColor = async (req, res) => {
   const name = req.query.name;
   const color = req.query.color
   try {
-    const data = await ProductModel.findOne({ name,color,size });
+    const data = await ProductModel.findOne({ name, color, size });
     res.json(data);
   }
   catch (err) {
@@ -195,7 +208,7 @@ exports.ListByNameAndColor = async (req, res) => {
   const name = req.query.name;
   const color = req.query.color
   try {
-    const data = await ProductModel.find({ name,color });
+    const data = await ProductModel.find({ name, color });
     res.json(data);
   }
   catch (err) {
