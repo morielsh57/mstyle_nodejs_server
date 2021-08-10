@@ -8,6 +8,7 @@ router.get('/', (req, res)=>{
 });
 
 router.post("/add",authToken, cartController.addToCart);
+
 router.post("/delete",authToken, cartController.deleteFromCart);
 
 

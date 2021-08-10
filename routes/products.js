@@ -7,9 +7,17 @@ router.get("/", productController.productsList);
 
 router.get("/basicData", productController.basicDataList);
 
+router.get("/basicData/:categoryId", productController.byCategoryIdList);
+
 router.get("/count", productController.productsAmount);
 
+router.get('/search', productController.search);
+
 router.get('/single/:id', productController.singleProduct);
+
+router.get('/singlebyName', productController.singleByNameAndColor);
+
+router.get('/ListByNameAndColor', productController.ListByNameAndColor);
 
 router.post("/", authToken,authAdminToken ,productController.createProduct);
 

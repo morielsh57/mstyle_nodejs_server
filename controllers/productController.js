@@ -45,6 +45,7 @@ exports.basicDataList = async (req, res) => {
   const page = (req.query.page) ? Number(req.query.page) : 0; //optional (?page=x), default: 0
   const sortQ = (req.query.sort) ? req.query.sort : "_id"; //sort by item - optional (?sort=?), default: sort by _id
   const ifReverse = (req.query.reverse) ? -1 : 1; //if ?reverse=true, ifReverse=-1 else default:1
+  const sizeQ = (req.query.size) ? req.query.size : 2;
 
   try {
     //?mainCategory=Men(optional)
@@ -55,14 +56,21 @@ exports.basicDataList = async (req, res) => {
       for (let i = 0; i < categories.length; i++) {
         categoryID_ar.push(categories[i].shortID);
       }
-      const data = await ProductModel.find({ categoryID: { $in: categoryID_ar }, size:2 },{name:1,price:1,images:1,categoryID:1,color:1,size:1,_id:1})
+      const data = await ProductModel.find({ categoryID: { $in: categoryID_ar }, size: sizeQ }, { name: 1, price: 1, images: 1, categoryID: 1, color: 1, size: 1, _id: 1 })
+        .sort({ [sortQ]: ifReverse })
+        .limit(perPage)
+        .skip(page * perPage)
+      res.json(data);
+    }
+    else if (req.query.name) {
+      const data = await ProductModel.find({ name: req.query.name, size: sizeQ }, { name: 1, price: 1, images: 1, categoryID: 1, color: 1, size: 1, _id: 1 })
         .sort({ [sortQ]: ifReverse })
         .limit(perPage)
         .skip(page * perPage)
       res.json(data);
     }
     else {
-      const data = await ProductModel.find({size: 2},{name:1,price:1,images:1,categoryID:1,color:1,size:1,_id:1})
+      const data = await ProductModel.find({ size: sizeQ }, { name: 1, price: 1, images: 1, categoryID: 1, color: 1, size: 1, _id: 1 })
         .sort({ [sortQ]: ifReverse })
         .limit(perPage)
         .skip(page * perPage)
@@ -75,9 +83,28 @@ exports.basicDataList = async (req, res) => {
   }
 }
 
+exports.byCategoryIdList = async (req, res) => {
+  const perPage = (req.query.perPage) ? Number(req.query.perPage) : 15; //if perPage not mentioned (?perPage=x) the default: 15
+  const page = (req.query.page) ? Number(req.query.page) : 0; //optional (?page=x), default: 0
+  const sortQ = (req.query.sort) ? req.query.sort : "_id"; //sort by item - optional (?sort=?), default: sort by _id
+  const ifReverse = (req.query.reverse) ? -1 : 1; //if ?reverse=true, ifReverse=-1 else default:1
+  const categoryId = req.params.categoryId;
+  try {
+    const data = await ProductModel.find({ categoryID: categoryId, size: 2 }, { name: 1, price: 1, images: 1, categoryID: 1, color: 1, size: 1, _id: 1 })
+      .sort({ [sortQ]: ifReverse })
+      .limit(perPage)
+      .skip(page * perPage)
+    res.json(data);
+  }
+  catch (err) {
+    console.log(err);
+    res.status(500).send(err);
+  }
+}
+
 //Will return how many products there are in total and can give how many products there are from a particular category
 exports.productsAmount = async (req, res) => {
-  try {
+  try {//by category main-name
     if (req.query.mainCategory) {
       const categories = await CategoryModel.find({ mainCategory: req.query.mainCategory });
       if (!categories || categories.length == 0) return res.status(400).json({ message: "Category not found" });
@@ -85,11 +112,15 @@ exports.productsAmount = async (req, res) => {
       for (let i = 0; i < categories.length; i++) {
         categoryID_ar.push(categories[i].shortID);
       }
-      const data = await ProductModel.countDocuments({ categoryID: { $in: categoryID_ar },size: 2 })
+      const data = await ProductModel.countDocuments({ categoryID: { $in: categoryID_ar }, size: 2 })
+      res.json({ count: data });
+    }//by category id
+    else if (req.query.categoryId) {
+      const data = await ProductModel.countDocuments({ categoryID: req.query.categoryId, size: 2 });
       res.json({ count: data });
     }
     else {
-      const data = await ProductModel.countDocuments({size: 2});
+      const data = await ProductModel.countDocuments({ size: 2 });
       res.json({ count: data });
     }
   }
@@ -99,9 +130,72 @@ exports.productsAmount = async (req, res) => {
   }
 }
 
+exports.search = async (req, res) => {
+  let searchQ = req.query.q;
+  let searchRexExp = new RegExp(searchQ,"i");
+  let perPage = (req.query.perPage) ? Number(req.query.perPage) : 5; //if perPage not mentioned (?perPage=x) the default: 5
+  let page = (req.query.page) ? Number(req.query.page) : 0; //optional (?page=x), default: 0
+  try {
+    const data = await ProductModel.find({$or:[{name:searchRexExp},{description:searchRexExp},{tags:searchRexExp}]})
+    .limit(perPage)
+    .skip(page * perPage)
+    res.json(data);
+  }
+  catch (err) {
+    console.log(err);
+    res.status(500).send(err);
+  }
+}
+
 exports.singleProduct = async (req, res) => {
   try {
     const data = await ProductModel.findOne({ _id: req.params.id });
+    res.json(data);
+  }
+  catch (err) {
+    console.log(err);
+    res.status(500).send(err);
+  }
+}
+
+exports.singleByNameAndColor = async (req, res) => {
+  const size = (req.query.size) ? req.query.size : 2;
+  const name = req.query.name;
+  const color = req.query.color
+  try {
+    const data = await ProductModel.findOne({ name,color,size });
+    res.json(data);
+  }
+  catch (err) {
+    console.log(err);
+    res.status(500).send(err);
+  }
+}
+
+exports.createProduct = async (req, res) => {
+  let validBody = validProduct(req.body);
+  if (validBody.error) {
+    return res.status(400).json(validBody.error.details);
+  }
+  try {
+    let user = await UserModel.findOne({ _id: req.userData._id })
+    let product = new ProductModel(req.body);
+    if (user.role === "supplier") product.supplierID = user._id;
+    product.catalogNumber = await generateCatalogNum();
+    await product.save();
+    res.status(201).json(product);
+  }
+  catch (err) {
+    console.log(err);
+    res.status(500).send(err)
+  }
+}
+
+exports.ListByNameAndColor = async (req, res) => {
+  const name = req.query.name;
+  const color = req.query.color
+  try {
+    const data = await ProductModel.find({ name,color });
     res.json(data);
   }
   catch (err) {
