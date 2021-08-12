@@ -10,4 +10,10 @@ router.get("/", (req,res) => {
 
 router.get("/singleOrder/:orderNumber", authToken, authAdminToken, orderController.singleOrder);
 
+router.get("/allOrders", authToken,authAdminToken ,orderController.allOrders);
+
+router.post("/", authToken, orderController.createOrder);
+
+router.patch("/status/:orderNumber", authToken, authAdminToken ,orderController.status);
+
 module.exports = router;
