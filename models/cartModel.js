@@ -15,3 +15,13 @@ exports.validAddToCart = (_body) => {
   })
   return joiSchema.validate(_body);
 }
+
+exports.validAddManyToCart = (_body) => {
+  let joiSchema = Joi.object({
+    cartArr:Joi.object({
+      id:Joi.string().min(24).max(24).required(),
+      amount:Joi.number().min(1).required(),
+    }).min(1).required()
+  })
+  return joiSchema.validate(_body);
+}

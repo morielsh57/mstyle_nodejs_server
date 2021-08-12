@@ -11,5 +11,6 @@ router.post("/add",authToken, cartController.addToCart);
 
 router.post("/delete",authToken, cartController.deleteFromCart);
 
+router.post("/addMany",authToken, cartController.addManyToCart);
 
 module.exports = router;

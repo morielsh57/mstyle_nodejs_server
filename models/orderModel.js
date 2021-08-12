@@ -22,7 +22,8 @@ exports.OrderModel = mongoose.model("orders", orderSchema);
 exports.validOrder = (_body) => {
   const joiSchema = Joi.object({
     totalPrice: Joi.number().min(1).required(),
-    cartAr: Joi.array().min(1).required()
+    cartAr: Joi.array().min(1).required(),
+    paypalID:Joi.string().min(1).required()
   })
   return joiSchema.validate(_body);
 }

@@ -1,3 +1,4 @@
+const { CartModel } = require("../models/cartModel");
 const { OrderModel, validOrder, generateOrderNum } = require("../models/orderModel");
 
 exports.singleOrder = async(req,res) => {
@@ -38,6 +39,11 @@ exports.createOrder = async(req,res) => {
     return res.status(400).json(validBody.error.details);
   }
   try{
+    //delete the cart of the user
+    let data = await CartModel.deleteOne({customerID:req.userData._id});
+    if(data.n !== 1){ //if the cart of the user did not deleted
+      return res.status(500).json({message:"Falid, please try again"})
+    }
     let newOrder = new OrderModel(req.body);
     newOrder.customerID = req.userData._id;
     newOrder.orderNumber = generateOrderNum();

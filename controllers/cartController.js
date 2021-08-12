@@ -1,4 +1,4 @@
-const { validAddToCart, CartModel } = require("../models/cartModel");
+const { validAddToCart, CartModel, validAddManyToCart } = require("../models/cartModel");
 const { ProductModel } = require("../models/productModel");
 
 exports.addToCart = async (req, res) => {
@@ -78,6 +78,37 @@ exports.deleteFromCart = async (req, res) => {
         return res.status(400).json({ message: "product not found in the cart" });
       }
     }
+  }
+  catch (err) {
+    console.log(err);
+    res.status(500).json(err);
+  }
+}
+
+exports.addManyToCart = async(req,res) => {
+  const validBody = validAddManyToCart(req.body);
+  if (validBody.error) {
+    return res.status(400).json(validBody.error.details);
+  }
+  try{
+    const customerID = req.userData._id;
+    let cartArr = req.body.cartArr;
+    let existCart = await CartModel.findOne({ customerID });
+    if(!existCart){
+      let cart = new CartModel();
+      cart.customerID = customerID;
+      await cart.save();
+      existCart = cart;
+    }
+    let customerCart =  existCart.productsID;
+    for(let i=0; i<cartArr.length; i++){
+      customerCart.push(cartArr[i]);
+      let product = await ProductModel.findOne({_id:cartArr[i].id});
+      let updateQty = product.quantity - cartArr[i].amount;
+      await ProductModel.updateOne({ _id: cartArr[i].id }, { quantity: updateQty });
+    }
+    let data = await CartModel.updateOne({customerID},{productsID:customerCart});
+    return res.status(200).json(data);
   }
   catch (err) {
     console.log(err);
