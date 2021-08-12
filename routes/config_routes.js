@@ -4,6 +4,7 @@ const categoryR = require("./categories");
 const productR = require("./products");
 const emailR = require("./email");
 const cartR = require("./carts");
+const orderR = require("./orders");
 
 exports.corseAccessControl = (app) => {
   app.all('*',  (req, res, next) => {
@@ -22,6 +23,7 @@ exports.routesInit = (app) => {
   app.use("/products", productR);
   app.use("/email", emailR);
   app.use("/carts", cartR);
+  app.use("/orders", orderR);
   
   app.use((req,res) => {
     res.status(404).json({msg:"404 url page not found"})
