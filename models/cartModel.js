@@ -18,10 +18,10 @@ exports.validAddToCart = (_body) => {
 
 exports.validAddManyToCart = (_body) => {
   let joiSchema = Joi.object({
-    cartArr:Joi.object({
+    cartArr:Joi.array().items(Joi.object({
       id:Joi.string().min(24).max(24).required(),
-      amount:Joi.number().min(1).required(),
-    }).min(1).required()
+      amount:Joi.number().min(1).required()
+    }))
   })
   return joiSchema.validate(_body);
 }

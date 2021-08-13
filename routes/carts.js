@@ -7,6 +7,8 @@ router.get('/', (req, res)=>{
   res.json({message:"cart router"});
 });
 
+router.get("/customerCart",authToken, cartController.getCustomerCart);
+
 router.post("/add",authToken, cartController.addToCart);
 
 router.post("/delete",authToken, cartController.deleteFromCart);

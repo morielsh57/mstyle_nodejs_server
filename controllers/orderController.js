@@ -46,7 +46,8 @@ exports.createOrder = async(req,res) => {
     }
     let newOrder = new OrderModel(req.body);
     newOrder.customerID = req.userData._id;
-    newOrder.orderNumber = generateOrderNum();
+    newOrder.orderNumber = await generateOrderNum();
+    console.log(newOrder);
     await newOrder.save();
     return res.status(201).json(newOrder);
   }
