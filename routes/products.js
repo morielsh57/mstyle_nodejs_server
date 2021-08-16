@@ -29,6 +29,8 @@ router.put("/delOneImage/:id/:indx", authToken,authAdminToken , productControlle
 
 router.put("/:id", authToken,authAdminToken, productController.editProduct);
 
+router.patch("/editPrice/:id", authToken,authAdminToken, productController.editPrice);
+
 router.put("/editMany/:id", authToken,authAdminToken, productController.editManyProduct);
 
 router.put("/upload/:editId", authToken,authAdminToken ,productController.upload);

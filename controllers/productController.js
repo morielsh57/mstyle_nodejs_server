@@ -1,5 +1,5 @@
 const _ = require("lodash");
-const { ProductModel, validProduct, generateCatalogNum } = require("../models/productModel");
+const { ProductModel, validProduct, generateCatalogNum, validEditPrice } = require("../models/productModel");
 const { UserModel } = require("../models/userModel");
 const path = require("path");
 const { CategoryModel } = require("../models/categoryModel");
@@ -285,6 +285,28 @@ exports.editProduct = async (req, res) => {
       return res.status(400).json({ message: "Error permission" });
     }
     let data = await ProductModel.updateOne({ _id: req.params.id }, req.body)
+    res.status(201).json(data);
+  }
+  catch (err) {
+    console.log(err);
+    res.status(400).send(err)
+  }
+}
+
+exports.editPrice = async (req, res) => {
+  let validBody = validEditPrice(req.body);
+  if (validBody.error) {
+    return res.status(400).json(validBody.error.details);
+  }
+  try {
+    if(!req.query.name) return res.status(400).json({ message: "You have to send name product in the query" });
+    const name = req.query.name;
+    const product = await ProductModel.findOne({ _id: req.params.id });
+    let user = await UserModel.findOne({ _id: req.userData._id })
+    if (user.role == "supplier" && user._id != product.supplierID) {
+      return res.status(400).json({ message: "Error permission" });
+    }
+    let data = await ProductModel.updateOne({ name }, {price:req.body.price});
     res.status(201).json(data);
   }
   catch (err) {

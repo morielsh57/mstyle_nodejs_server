@@ -12,7 +12,7 @@ const pickUpPointsSchema = new mongoose.Schema({
   }
 });
 
-exports.PickupPointModel = mongoose.model("pickupPoints",pickUpPointsSchema);
+exports.PickupPointModel = mongoose.model("pick_up_points",pickUpPointsSchema);
 
 exports.validPoint = (_body) => {
   const joiSchema = Joi.object({

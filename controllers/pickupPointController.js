@@ -6,9 +6,9 @@ exports.getPoints = async (req, res) => {
   try {
     if (!req.query.lat) return res.status(400).json({ message: "You have to send lat in the query" });
     if (!req.query.lng) return res.status(400).json({ message: "You have to send lng in the query" });
-    const latQ = req.query.lat;
-    const lngQ = req.query.lng;
-    const radius = (req.query.radius) ? req.query.radius : 0.2;
+    const latQ = Number(req.query.lat);
+    const lngQ = Number(req.query.lng);
+    const radius = (req.query.radius) ? Number(req.query.radius) : 0.2;
     let points = await PickupPointModel.find({
       $and: [
         { lat: { $lte: latQ + radius, $gte: latQ - radius } },
