@@ -11,6 +11,7 @@ const orderSchema = new mongoose.Schema({
     type: String, default: "pending"
   },
   paypalID: String,
+  shipData: Object,
   cartAr: Array,
   date_created: {
     type: Date, default: Date.now()
@@ -23,6 +24,10 @@ exports.validOrder = (_body) => {
   const joiSchema = Joi.object({
     totalPrice: Joi.number().min(1).required(),
     cartAr: Joi.array().min(1).required(),
+    shipData: Joi.object({
+      name:Joi.string().min(1).required(),
+      address:Joi.string().min(1).required()
+    }),
     paypalID:Joi.string().min(1).required()
   })
   return joiSchema.validate(_body);
