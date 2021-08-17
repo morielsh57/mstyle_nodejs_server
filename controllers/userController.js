@@ -155,10 +155,9 @@ exports.editUserProfile = async (req, res) => {
   const validBody = validUser(req.body);
   if (validBody.error) return res.status(400).json(validBody.error.details);
   try {
-    const user = await UserModel.findOne({ _id: req.userData._id })
-    if (user.role !== "admin") return res.status(400).json({ message: "You have to be an admin" });
+    if (req.userData._id !== req.params.id) return res.status(400).json({ message: "error permission" });
     const salt = await bcrypt.genSalt(10);
-    req.body.password = await bcrypt.hash(user.password, salt);
+    req.body.password = await bcrypt.hash(req.body.password, salt);
     const data = await UserModel.updateOne({ _id: req.params.id }, req.body);
     res.status(201).json(data);
   }

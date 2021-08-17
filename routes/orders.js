@@ -17,4 +17,6 @@ router.post("/", authToken, orderController.createOrder);
 router.patch("/status/:orderNumber", authToken, authAdminToken ,orderController.status);
 //TODO delete order
 
+router.get("/myOrders", authToken ,orderController.myOrders );
+
 module.exports = router;

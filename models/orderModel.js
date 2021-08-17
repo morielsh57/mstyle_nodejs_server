@@ -26,6 +26,7 @@ exports.validOrder = (_body) => {
     cartAr: Joi.array().min(1).required(),
     shipData: Joi.object({
       name:Joi.string().min(1).required(),
+      description:Joi.string().min(1).required(),
       address:Joi.string().min(1).required()
     }),
     paypalID:Joi.string().min(1).required()

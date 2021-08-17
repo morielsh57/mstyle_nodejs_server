@@ -26,7 +26,7 @@ router.get("/customerAmount",authToken, authAdminToken , userController.customer
 
 router.delete("/:id", authToken, authAdminToken , userController.deleteUser);
 
-router.put("/editProfile/:id", authToken, authAdminToken, userController.editUserProfile);
+router.put("/editProfile/:id", authToken, userController.editUserProfile);
 
 router.put("/:id", authToken, authAdminToken, userController.editUser);
 

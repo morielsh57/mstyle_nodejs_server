@@ -20,7 +20,6 @@ exports.allOrders = async(req,res) => {
   let ifReverse = (req.query.reverse) ? -1 : 1;
 
   try {
-    // filter -> query
     let data = await OrderModel.find({})
       .sort({ [sortQ]: ifReverse })
       .limit(perPage)
@@ -69,4 +68,24 @@ exports.status = async(req,res) => {
     console.log(err);
     res.status(500).send(err)
   } 
+}
+
+
+exports.myOrders = async(req,res) => {
+  let perPage = (req.query.perPage) ? Number(req.query.perPage) : 8;
+  let page = (req.query.page) ? Number(req.query.page) : 0;
+  let sortQ = (req.query.sort) ? req.query.sort : "_id";
+  let ifReverse = (req.query.reverse) ? -1 : 1;
+
+  try {
+    let data = await OrderModel.find({customerID:req.userData._id})
+      .sort({ [sortQ]: ifReverse })
+      .limit(perPage)
+      .skip(page * perPage)
+    res.json(data);
+  }
+  catch (err) {
+    console.log(err);
+    res.status(500).json(err);
+  }
 }

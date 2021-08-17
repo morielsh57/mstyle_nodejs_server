@@ -306,7 +306,7 @@ exports.editPrice = async (req, res) => {
     if (user.role == "supplier" && user._id != product.supplierID) {
       return res.status(400).json({ message: "Error permission" });
     }
-    let data = await ProductModel.updateOne({ name }, {price:req.body.price});
+    let data = await ProductModel.updateMany({ name }, {price:req.body.price});
     res.status(201).json(data);
   }
   catch (err) {
