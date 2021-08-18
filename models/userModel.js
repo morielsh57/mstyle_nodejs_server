@@ -19,7 +19,9 @@ let userSchema = new mongoose.Schema({
   },
   date_created: {
     type: Date, default: Date.now()
-  }
+  },
+  //for suppliers
+  unreadCounter: Number,
 })
 
 exports.UserModel = mongoose.model("users", userSchema);

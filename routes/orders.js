@@ -15,8 +15,11 @@ router.get("/allOrders", authToken,authAdminToken ,orderController.allOrders);
 router.post("/", authToken, orderController.createOrder);
 
 router.patch("/status/:orderNumber", authToken, authAdminToken ,orderController.status);
-//TODO delete order
+
+router.delete("/:orderNumber", authToken ,authAdminToken, orderController.deleteOrder );
 
 router.get("/myOrders", authToken ,orderController.myOrders );
+
+router.get("/mySingleOrder/:orderNumber", authToken ,orderController.mySingleOrder );
 
 module.exports = router;

@@ -200,6 +200,9 @@ exports.createUserAsAdmin = async (req, res) => {
     user.isValidEmail = true;
     const salt = await bcrypt.genSalt(10);
     user.password = await bcrypt.hash(user.password, salt);
+    if(roleName==="supplier"){
+      user.unreadCounter = 0;
+    }
     await user.save();
     res.status(201).json(_.pick(user, ["name", "role", "_id", "email", "phone", "address", "date_created",]));
   }

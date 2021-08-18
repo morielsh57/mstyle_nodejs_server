@@ -16,6 +16,8 @@ const orderSchema = new mongoose.Schema({
   date_created: {
     type: Date, default: Date.now()
   },
+  //for notifications
+  supplierID:Array
 });
 
 exports.OrderModel = mongoose.model("orders", orderSchema);
@@ -29,7 +31,8 @@ exports.validOrder = (_body) => {
       description:Joi.string().min(1).required(),
       address:Joi.string().min(1).required()
     }),
-    paypalID:Joi.string().min(1).required()
+    paypalID:Joi.string().min(1).required(),
+    supplierID: Joi.array().items(Joi.string().min(24).max(24)).min(1).required(),
   })
   return joiSchema.validate(_body);
 }

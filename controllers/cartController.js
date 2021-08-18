@@ -5,7 +5,7 @@ exports.getCustomerCart = async(req,res) => {
   try{
     const customerID = req.userData._id;
     const cart = await CartModel.findOne({customerID});
-    if(!cart) return res.status(400).json({ message: "no cart found for this user" });
+    if(!cart) return res.json({ message: "no cart found for this user" });
     console.log(cart._id);
     res.status(200).json(cart);
   }
