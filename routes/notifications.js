@@ -5,6 +5,6 @@ const router = express.Router();
 
 router.get("/myNot",authToken, authAdminToken, notController.getNotifications);
 
-router.get("/isReadTrue/:id",authToken, authAdminToken, notController.isReadTrue);
+router.put("/isReadTrue/:id",authToken, authAdminToken, notController.isReadTrue);
 
 module.exports = router;

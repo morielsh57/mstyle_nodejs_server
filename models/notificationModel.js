@@ -3,9 +3,9 @@ const Joi = require("joi");
 
 const notificationSchema = new mongoose.Schema({
   type: Number,
-  orderID: Number,
+  orderNumber: Number,
   supplierID: Array,
-  isReed:  {
+  isRead:  {
     type: Boolean, default: false
   },
   date_created: {
