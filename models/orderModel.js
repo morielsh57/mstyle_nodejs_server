@@ -51,3 +51,11 @@ exports.generateOrderNum = async () => {
   }
   return rnd;
 }
+
+exports.initializeIsReviewFalse = (length) => {
+  let falseAr = [];
+  for(let i=0; i<length; i++){
+    falseAr.push(false);
+  }
+  return falseAr;
+}

@@ -49,6 +49,7 @@ exports.createOrder = async (req, res) => {
     let newOrder = new OrderModel(req.body);
     newOrder.customerID = req.userData._id;
     newOrder.orderNumber = await generateOrderNum();
+    newOrder.isReview = initializeIsReviewFalse(req.body.cartAr.length);
     await newOrder.save();
 
     //create notification for the suppliers
