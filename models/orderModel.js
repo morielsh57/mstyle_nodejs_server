@@ -17,7 +17,9 @@ const orderSchema = new mongoose.Schema({
     type: Date, default: Date.now()
   },
   //for notifications
-  supplierID:Array
+  supplierID:Array,
+  //for reviews
+  isReview: Array
 });
 
 exports.OrderModel = mongoose.model("orders", orderSchema);
