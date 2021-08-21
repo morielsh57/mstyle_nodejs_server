@@ -20,6 +20,8 @@ router.get('/count', userController.userAmount);
 
 router.get('/single/:id',authToken, userController.singleUser);
 
+router.get('/singleNameAvatar/:id', userController.singleNameAvatar);
+
 router.get("/myInfo",authToken , userController.userInfo);
 
 router.get("/customerAmount",authToken, authAdminToken , userController.customersAmount);

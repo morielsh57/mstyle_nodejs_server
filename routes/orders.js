@@ -20,6 +20,8 @@ router.delete("/:orderNumber", authToken ,authAdminToken, orderController.delete
 
 router.get("/myOrders", authToken ,orderController.myOrders );
 
+router.get("/myOrders/count", authToken ,orderController.myOrdersCount );
+
 router.get("/mySingleOrder/:orderNumber", authToken ,orderController.mySingleOrder );
 
 module.exports = router;

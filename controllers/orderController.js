@@ -1,12 +1,12 @@
 const { CartModel } = require("../models/cartModel");
 const { NotificationModel } = require("../models/notificationModel");
-const { OrderModel, validOrder, generateOrderNum } = require("../models/orderModel");
+const { OrderModel, validOrder, generateOrderNum, initializeIsReviewFalse } = require("../models/orderModel");
 const { UserModel } = require("../models/userModel");
 
 exports.singleOrder = async (req, res) => {
-  let orderNumber = req.params.orderNumber;
+  const orderNumber = req.params.orderNumber;
   try {
-    let data = await OrderModel.findOne({ orderNumber });
+    const data = await OrderModel.findOne({ orderNumber });
     res.json(data);
   }
   catch (err) {
@@ -16,13 +16,13 @@ exports.singleOrder = async (req, res) => {
 }
 
 exports.allOrders = async (req, res) => {
-  let perPage = (req.query.perPage) ? Number(req.query.perPage) : 8;
-  let page = (req.query.page) ? Number(req.query.page) : 0;
-  let sortQ = (req.query.sort) ? req.query.sort : "_id";
-  let ifReverse = (req.query.reverse) ? -1 : 1;
+  const perPage = (req.query.perPage) ? Number(req.query.perPage) : 8;
+  const page = (req.query.page) ? Number(req.query.page) : 0;
+  const sortQ = (req.query.sort) ? req.query.sort : "_id";
+  const ifReverse = (req.query.reverse) ? -1 : 1;
 
   try {
-    let data = await OrderModel.find({})
+    const data = await OrderModel.find({})
       .sort({ [sortQ]: ifReverse })
       .limit(perPage)
       .skip(page * perPage)
@@ -40,9 +40,9 @@ exports.createOrder = async (req, res) => {
     return res.status(400).json(validBody.error.details);
   }
   try {
-    let supplierID_ar = req.body.supplierID;
+    const supplierID_ar = req.body.supplierID;
     //delete the cart of the user
-    let data = await CartModel.deleteOne({ customerID: req.userData._id });
+    const data = await CartModel.deleteOne({ customerID: req.userData._id });
     if (data.n !== 1) { //if the cart of the user did not deleted
       return res.status(500).json({ message: "Falid, please try again" })
     }
@@ -57,7 +57,7 @@ exports.createOrder = async (req, res) => {
     notification.type = 1;
     notification.orderNumber = newOrder.orderNumber;
     notification.supplierID = [];
-    let user_ar = await UserModel.find({ _id: { $in: supplierID_ar } });
+    const user_ar = await UserModel.find({ _id: { $in: supplierID_ar } });
 
     for (let i = 0; i < user_ar.length; i++) {
       if (user_ar[i].role !== "supplier") {
@@ -83,7 +83,7 @@ exports.status = async (req, res) => {
     return res.status(400).json({ msg: "You must send status" });
   }
   try {
-    let data = await OrderModel.updateOne({ orderNumber: req.params.orderNumber }, { status: req.body.status });
+    const data = await OrderModel.updateOne({ orderNumber: req.params.orderNumber }, { status: req.body.status });
     return res.json(data);
   }
   catch (err) {
@@ -107,13 +107,13 @@ exports.deleteOrder = async (req, res) => {
 
 
 exports.myOrders = async (req, res) => {
-  let perPage = (req.query.perPage) ? Number(req.query.perPage) : 8;
-  let page = (req.query.page) ? Number(req.query.page) : 0;
-  let sortQ = (req.query.sort) ? req.query.sort : "_id";
-  let ifReverse = (req.query.reverse) ? -1 : 1;
+  const perPage = (req.query.perPage) ? Number(req.query.perPage) : 8;
+  const page = (req.query.page) ? Number(req.query.page) : 0;
+  const sortQ = (req.query.sort) ? req.query.sort : "_id";
+  const ifReverse = (req.query.reverse) ? -1 : 1;
 
   try {
-    let data = await OrderModel.find({ customerID: req.userData._id })
+    const data = await OrderModel.find({ customerID: req.userData._id })
       .sort({ [sortQ]: ifReverse })
       .limit(perPage)
       .skip(page * perPage)
@@ -125,10 +125,21 @@ exports.myOrders = async (req, res) => {
   }
 }
 
+exports.myOrdersCount = async (req, res) => {
+  try {
+    const data = await OrderModel.countDocuments({ customerID: req.userData._id });
+    res.json({ count: data });
+  }
+  catch (err) {
+    console.log(err);
+    res.status(500).json(err);
+  }
+}
+
 exports.mySingleOrder = async (req, res) => {
   const orderNumber = req.params.orderNumber;
   try {
-    let order = await OrderModel.findOne({ $and: [{ customerID: req.userData._id }, { orderNumber }] }, { paypalID: 0, customerID: 0 })
+    const order = await OrderModel.findOne({ $and: [{ customerID: req.userData._id }, { orderNumber }] }, { paypalID: 0, customerID: 0 })
     if (!order) return res.status(400).json({ message: "order not exist" });
     res.json(order);
   }

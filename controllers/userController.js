@@ -107,6 +107,17 @@ exports.singleUser = async (req, res) => {
   }
 }
 
+exports.singleNameAvatar = async (req, res) => {
+  try {
+    const data = await UserModel.findOne({ _id: req.params.id }, { name: 1,avatar:1 })
+    res.json(data);
+  }
+  catch (err) {
+    console.log(err);
+    res.status(500).send(err);
+  }
+}
+
 //get information of the user that the token is belong to him
 exports.userInfo = async (req, res) => {
   try {

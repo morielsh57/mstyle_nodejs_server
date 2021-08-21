@@ -11,6 +11,8 @@ router.post("/", authToken, reviewController.createReview);
 
 router.get("/single/:orderNum/:prodId", authToken, reviewController.getSingleReview);
 
-router.get("/prodReviews/:productID", authToken, reviewController.getproductReviews);
+router.get("/prodReviews/:productID", reviewController.getproductReviews);
+
+router.put("/:orderNum/:prodId", authToken, reviewController.editReview);
 
 module.exports = router;
