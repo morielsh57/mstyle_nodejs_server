@@ -204,6 +204,28 @@ exports.createProduct = async (req, res) => {
   }
 }
 
+exports.createAllSize = async (req, res) => {
+  let validBody = validProduct(req.body);
+  if (validBody.error) {
+    return res.status(400).json(validBody.error.details);
+  }
+  try {
+    for(let i=0; i<5; i++){
+      let product = new ProductModel(req.body);
+      product.supplierID = "60ff97bddd93278070a05777";
+      product.catalogNumber = await generateCatalogNum();
+      product.size = i;
+      await product.save();
+    }
+    let prodAr = await ProductModel.find({name:req.body.name}); 
+    res.status(201).json(prodAr); 
+  }
+  catch (err) {
+    console.log(err);
+    res.status(500).send(err)
+  }
+}
+
 exports.ListByNameAndColor = async (req, res) => {
   const name = req.query.name;
   const color = req.query.color
@@ -261,9 +283,7 @@ exports.deleteOneImage = async (req, res) => {
     const i = req.params.indx;
     const product = await ProductModel.findOne({ _id: req.params.id });
     let image_ar = product.images;
-    console.log(image_ar);
     image_ar.splice(i, 1);
-    console.log(image_ar);
     let data = await ProductModel.updateOne({ _id: req.params.id }, { images: image_ar });
     res.json(data);
   }
@@ -337,15 +357,17 @@ exports.editManyProduct = async (req, res) => {
 
 
 exports.upload = async (req, res) => {
+  // console.log("moriell");
   if (req.files.fileSend) {
-    let fileInfo = req.files.fileSend;
+    let fileInfo = [];
+    if(req.files.fileSend.length === undefined) fileInfo.push(req.files.fileSend);
+    else fileInfo = req.files.fileSend;
     //?file=men
     let file = req.query.file;
-    if (file != "women" && file != "men" && file != "accessories" && file != "kids") return res.status(400).json({ err: "Invalid File Name" });
+    if (file != "women" && file != "men" && file != "accessories" && file != "boys" && file != "girls") return res.status(400).json({ err: "Invalid File Name" });
     const product = await ProductModel.findOne({ _id: req.params.editId });
     let imagesAr = product.images;
     for (let i = 0; i < fileInfo.length; i++) {
-      console.log(fileInfo[i]);
       // collect the end of the url
       fileInfo[i].ext = path.extname(fileInfo[i].name);
       // define the location of the file in the project

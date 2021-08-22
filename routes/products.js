@@ -23,6 +23,8 @@ router.get('/ListByNameAndColor', productController.ListByNameAndColor);
 
 router.post("/", authToken,authAdminToken ,productController.createProduct);
 
+router.post("/createAllSize", authToken,authAdminToken ,productController.createAllSize);
+
 router.delete("/:id", authToken,authAdminToken , productController.deleteProduct);
 
 router.put("/delOneImage/:id/:indx", authToken,authAdminToken , productController.deleteOneImage);
@@ -33,7 +35,7 @@ router.put("/editPrice/:id", authToken,authAdminToken, productController.editPri
 
 router.put("/editMany/:id", authToken,authAdminToken, productController.editManyProduct);
 
-router.put("/upload/:editId", authToken,authAdminToken ,productController.upload);
+router.post("/upload/:editId", authToken,authAdminToken ,productController.upload);
 
 
 module.exports = router;
