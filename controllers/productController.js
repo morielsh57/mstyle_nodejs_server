@@ -6,8 +6,8 @@ const { CategoryModel } = require("../models/categoryModel");
 
 //retrun list of products:
 exports.productsList = async (req, res) => {
-  const perPage = (req.query.perPage) ? Number(req.query.perPage) : 5; //if perPage not mentioned (?perPage=x) the default: 5
-  const page = (req.query.page) ? Number(req.query.page) : 0; //optional (?page=x), default: 0
+  // const perPage = (req.query.perPage) ? Number(req.query.perPage) : 5; //if perPage not mentioned (?perPage=x) the default: 5
+  // const page = (req.query.page) ? Number(req.query.page) : 0; //optional (?page=x), default: 0
   const sortQ = (req.query.sort) ? req.query.sort : "_id"; //sort by item - optional (?sort=?), default: sort by _id
   const ifReverse = (req.query.reverse) ? -1 : 1; //if ?reverse=true, ifReverse=-1 else default:1
 
@@ -22,15 +22,15 @@ exports.productsList = async (req, res) => {
       }
       const data = await ProductModel.find({ categoryID: { $in: categoryID_ar } })
         .sort({ [sortQ]: ifReverse })
-        .limit(perPage)
-        .skip(page * perPage)
+        // .limit(perPage)
+        // .skip(page * perPage)
       res.json(data);
     }
     else {
       const data = await ProductModel.find({})
         .sort({ [sortQ]: ifReverse })
-        .limit(perPage)
-        .skip(page * perPage)
+        // .limit(perPage)
+        // .skip(page * perPage)
       res.json(data);
     }
   }
