@@ -211,8 +211,9 @@ exports.createAllSize = async (req, res) => {
   }
   try {
     for(let i=0; i<5; i++){
+      let user = await UserModel.findOne({ _id: req.userData._id })
       let product = new ProductModel(req.body);
-      product.supplierID = "60ff97bddd93278070a05777";
+      if (user.role === "supplier") product.supplierID = user._id;
       product.catalogNumber = await generateCatalogNum();
       product.size = i;
       await product.save();
