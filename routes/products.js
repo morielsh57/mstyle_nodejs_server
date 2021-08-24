@@ -35,7 +35,7 @@ router.put("/editPrice/:id", authToken,authAdminToken, productController.editPri
 
 router.put("/editMany/:id", authToken,authAdminToken, productController.editManyProduct);
 
-router.post("/upload/:editId", authToken,authAdminToken ,productController.upload);
+router.put("/upload/:editId", authToken,authAdminToken ,productController.upload);
 
 
 module.exports = router;
