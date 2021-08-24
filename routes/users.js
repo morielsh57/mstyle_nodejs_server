@@ -12,6 +12,8 @@ router.post('/', userController.createUser);
 
 router.post('/login', userController.loginUser);
 
+router.get('/isCorrectPass/:pass', authToken, userController.isCorrectPass);
+
 router.post("/checkAdmin",authToken,authAdminToken, userController.checkIfAdmin);
 
 router.get('/usersList',authToken,authAdminToken, userController.usersList);

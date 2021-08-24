@@ -36,7 +36,7 @@ exports.validUser = (_bodyUser) => {
     name: Joi.string().min(2).max(100).required(),
     email: Joi.string().min(2).max(100).email().required(),
     phone: Joi.string().min(9).max(20).required(),
-    password: Joi.string().min(2).max(100).required(),
+    password: Joi.string().min(2).max(100).allow(null, ''),
     address: Joi.string().min(2).max(200).required(),
     avatar: Joi.string().min(2).max(200).allow(null, ''),
   })

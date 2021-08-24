@@ -52,6 +52,22 @@ exports.loginUser = async (req, res) => {
   }
 }
 
+exports.isCorrectPass = async(req,res) => {
+  try{
+    let isCorrect = true;
+    const user = await UserModel.findOne({ _id: req.userData._id })
+    const validPass = await bcrypt.compare(req.params.pass, user.password);
+    if(!validPass){
+      isCorrect = false;
+    }
+    res.json(isCorrect)
+  }
+  catch (err) {
+    console.log(err);
+    res.status(500).send(err);
+  }
+}
+
 exports.checkIfAdmin = async (req, res) => {
   const user = await UserModel.findOne({ _id: req.userData._id })
   res.json({ role: user.role });
@@ -166,9 +182,12 @@ exports.editUserProfile = async (req, res) => {
   const validBody = validUser(req.body);
   if (validBody.error) return res.status(400).json(validBody.error.details);
   try {
+    console.log("here");
     if (req.userData._id !== req.params.id) return res.status(400).json({ message: "error permission" });
-    const salt = await bcrypt.genSalt(10);
-    req.body.password = await bcrypt.hash(req.body.password, salt);
+    if (req.body.password){
+      const salt = await bcrypt.genSalt(10);
+      req.body.password = await bcrypt.hash(req.body.password, salt);
+    }
     const data = await UserModel.updateOne({ _id: req.params.id }, req.body);
     res.status(201).json(data);
   }
