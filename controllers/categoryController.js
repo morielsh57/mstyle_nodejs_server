@@ -36,6 +36,18 @@ exports.singleCategory = async (req, res) => {
   }
 }
 
+exports.categoryByMain = async(req,res) => {
+  try{
+    let categories = await CategoryModel.find({mainCategory:req.params.main});
+    if(!categories||categories.length===0) return res.json({message:"main category not found"});
+    res.status(200).json(categories);
+  }  
+  catch (err) {
+    console.log(err);
+    res.status(500).json(err);
+  }
+}
+
 exports.categoryAmount = async (req, res) => {
   try {
     const data = await CategoryModel.countDocuments({});
