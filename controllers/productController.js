@@ -6,33 +6,28 @@ const { CategoryModel } = require("../models/categoryModel");
 
 //retrun list of products:
 exports.productsList = async (req, res) => {
-  // const perPage = (req.query.perPage) ? Number(req.query.perPage) : 5; //if perPage not mentioned (?perPage=x) the default: 5
-  // const page = (req.query.page) ? Number(req.query.page) : 0; //optional (?page=x), default: 0
+  const perPage = (req.query.perPage) ? Number(req.query.perPage) : 5; //if perPage not mentioned (?perPage=x) the default: 5
+  const page = (req.query.page) ? Number(req.query.page) : 0; //optional (?page=x), default: 0
   const sortQ = (req.query.sort) ? req.query.sort : "_id"; //sort by item - optional (?sort=?), default: sort by _id
-  const ifReverse = (req.query.reverse) ? -1 : 1; //if ?reverse=true, ifReverse=-1 else default:1
+  const ifReverse = (req.query.reverse && req.query.reverse==="true") ? -1 : 1; //if ?reverse=true, ifReverse=-1 else default:1
 
   try {
+    let filter = {};
     //?mainCategory=Men(optional)
     if (req.query.mainCategory) {
-      const categories = await CategoryModel.find({ mainCategory: req.query.mainCategory });
-      if (!categories || categories.length == 0) return res.status(400).json({ message: "Category not found" });
+      const categoryID_objAr = await CategoryModel.find({ mainCategory: req.query.mainCategory }, { shortID: 1, _id: 0 });
+      if (!categoryID_objAr || categoryID_objAr.length == 0) return res.status(400).json({ message: "Category not found" });
       let categoryID_ar = [];
-      for (let i = 0; i < categories.length; i++) {
-        categoryID_ar.push(categories[i].shortID);
+      for (let i = 0; i < categoryID_objAr.length; i++) {
+        categoryID_ar.push(categoryID_objAr[i].shortID);
       }
-      const data = await ProductModel.find({ categoryID: { $in: categoryID_ar } })
-        .sort({ [sortQ]: ifReverse })
-        // .limit(perPage)
-        // .skip(page * perPage)
-      res.json(data);
+      filter = { categoryID: { $in: categoryID_ar } };
     }
-    else {
-      const data = await ProductModel.find({})
-        .sort({ [sortQ]: ifReverse })
-        // .limit(perPage)
-        // .skip(page * perPage)
-      res.json(data);
-    }
+    const data = await ProductModel.find(filter)
+      .sort({ [sortQ]: ifReverse })
+      .limit(perPage)
+      .skip(page * perPage)
+    res.json(data);
   }
   catch (err) {
     console.log(err);
@@ -44,7 +39,7 @@ exports.basicDataList = async (req, res) => {
   const perPage = (req.query.perPage) ? Number(req.query.perPage) : 15; //if perPage not mentioned (?perPage=x) the default: 15
   const page = (req.query.page) ? Number(req.query.page) : 0; //optional (?page=x), default: 0
   const sortQ = (req.query.sort) ? req.query.sort : "_id"; //sort by item - optional (?sort=?), default: sort by _id
-  const ifReverse = (req.query.reverse) ? -1 : 1; //if ?reverse=true, ifReverse=-1 else default:1
+  const ifReverse = (req.query.reverse && req.query.reverse==="true") ? -1 : 1; //if ?reverse=true, ifReverse=-1 else default:1
   const sizeQ = (req.query.size) ? req.query.size : 2;
 
   try {
@@ -87,7 +82,7 @@ exports.byCategoryIdList = async (req, res) => {
   const perPage = (req.query.perPage) ? Number(req.query.perPage) : 15; //if perPage not mentioned (?perPage=x) the default: 15
   const page = (req.query.page) ? Number(req.query.page) : 0; //optional (?page=x), default: 0
   const sortQ = (req.query.sort) ? req.query.sort : "_id"; //sort by item - optional (?sort=?), default: sort by _id
-  const ifReverse = (req.query.reverse) ? -1 : 1; //if ?reverse=true, ifReverse=-1 else default:1
+  const ifReverse = (req.query.reverse && req.query.reverse==="true") ? -1 : 1; //if ?reverse=true, ifReverse=-1 else default:1
   const categoryId = req.params.categoryId;
   try {
     const data = await ProductModel.find({ categoryID: categoryId, size: 2 }, { name: 1, price: 1, images: 1, categoryID: 1, color: 1, size: 1, _id: 1 })
@@ -105,6 +100,7 @@ exports.byCategoryIdList = async (req, res) => {
 //Will return how many products there are in total and can give how many products there are from a particular category
 exports.productsAmount = async (req, res) => {
   try {//by category main-name
+    let filter = { size: 2 };
     if (req.query.mainCategory) {
       const categories = await CategoryModel.find({ mainCategory: req.query.mainCategory });
       if (!categories || categories.length == 0) return res.status(400).json({ message: "Category not found" });
@@ -112,17 +108,14 @@ exports.productsAmount = async (req, res) => {
       for (let i = 0; i < categories.length; i++) {
         categoryID_ar.push(categories[i].shortID);
       }
-      const data = await ProductModel.countDocuments({ categoryID: { $in: categoryID_ar }, size: 2 })
-      res.json({ count: data });
+      filter = { categoryID: { $in: categoryID_ar }, size: 2 }
+      if (req.query.allsize==="true"){
+        filter = { categoryID: { $in: categoryID_ar } }
+      }
     }//by category id
-    else if (req.query.categoryId) {
-      const data = await ProductModel.countDocuments({ categoryID: req.query.categoryId, size: 2 });
-      res.json({ count: data });
-    }
-    else {
-      const data = await ProductModel.countDocuments({ size: 2 });
-      res.json({ count: data });
-    }
+    else if (req.query.categoryId) filter = { categoryID: req.query.categoryId, size: 2 };
+    const data = await ProductModel.countDocuments(filter);
+    res.json({ count: data });
   }
   catch (err) {
     console.log(err);
@@ -176,6 +169,7 @@ exports.singleByNameAndColor = async (req, res) => {
   const name = req.query.name;
   const color = req.query.color
   try {
+    if(!name || !color) return res.status(400).json({message:"send name and color"})
     const data = await ProductModel.findOne({ name, color, size });
     res.json(data);
   }
@@ -210,7 +204,7 @@ exports.createAllSize = async (req, res) => {
     return res.status(400).json(validBody.error.details);
   }
   try {
-    for(let i=0; i<5; i++){
+    for (let i = 0; i < 5; i++) {
       let user = await UserModel.findOne({ _id: req.userData._id })
       let product = new ProductModel(req.body);
       if (user.role === "supplier") product.supplierID = user._id;
@@ -218,8 +212,8 @@ exports.createAllSize = async (req, res) => {
       product.size = i;
       await product.save();
     }
-    let prodAr = await ProductModel.find({name:req.body.name}); 
-    res.status(201).json(prodAr); 
+    let prodAr = await ProductModel.find({ name: req.body.name });
+    res.status(201).json(prodAr);
   }
   catch (err) {
     console.log(err);
@@ -320,14 +314,14 @@ exports.editPrice = async (req, res) => {
     return res.status(400).json(validBody.error.details);
   }
   try {
-    if(!req.query.name) return res.status(400).json({ message: "You have to send name product in the query" });
+    if (!req.query.name) return res.status(400).json({ message: "You have to send name product in the query" });
     const name = req.query.name;
     const product = await ProductModel.findOne({ _id: req.params.id });
     let user = await UserModel.findOne({ _id: req.userData._id })
     if (user.role == "supplier" && user._id != product.supplierID) {
       return res.status(400).json({ message: "Error permission" });
     }
-    let data = await ProductModel.updateMany({ name }, {price:req.body.price});
+    let data = await ProductModel.updateMany({ name }, { price: req.body.price });
     res.status(201).json(data);
   }
   catch (err) {
@@ -361,7 +355,7 @@ exports.upload = async (req, res) => {
   // console.log("moriell");
   if (req.files.fileSend) {
     let fileInfo = [];
-    if(req.files.fileSend.length === undefined) fileInfo.push(req.files.fileSend);
+    if (req.files.fileSend.length === undefined) fileInfo.push(req.files.fileSend);
     else fileInfo = req.files.fileSend;
     //?file=men
     let file = req.query.file;
