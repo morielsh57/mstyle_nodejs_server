@@ -5,8 +5,7 @@ exports.getNotifications = async (req, res) => {
   try {
     const user = await UserModel.findOne({ _id: req.userData._id })
     if (user.role !== "supplier") return res.json({ message: "You have to be a supplier" });
-    //need by the token of the supplier
-    let data = await NotificationModel.find({});
+    let data = await NotificationModel.find({supplierID:req.userData._id});
     return res.status(200).json(data);
   }
   catch (err) {
