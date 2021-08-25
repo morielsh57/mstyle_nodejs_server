@@ -19,10 +19,20 @@ exports.allOrders = async (req, res) => {
   const perPage = (req.query.perPage) ? Number(req.query.perPage) : 8;
   const page = (req.query.page) ? Number(req.query.page) : 0;
   const sortQ = (req.query.sort) ? req.query.sort : "_id";
-  const ifReverse = (req.query.reverse) ? -1 : 1;
+  const ifReverse = (req.query.reverse && req.query.reverse==="true") ? -1 : 1;
 
   try {
-    const data = await OrderModel.find({})
+    let allOrForSupplier = {};
+    const user = await UserModel.findOne({ _id: req.userData._id })
+    if (user.role === "supplier"){
+      let notificOrderNum = await NotificationModel.find({supplierID:req.userData._id},{orderNumber:1});
+      let OrderNum_ar = [];
+      for(let i=0; i<notificOrderNum.length; i++){
+        OrderNum_ar.push(notificOrderNum[i].orderNumber);
+      }
+      allOrForSupplier = {orderNumber:{$in: OrderNum_ar}}
+    }
+    const data = await OrderModel.find(allOrForSupplier)
       .sort({ [sortQ]: ifReverse })
       .limit(perPage)
       .skip(page * perPage)
@@ -64,7 +74,10 @@ exports.createOrder = async (req, res) => {
         await OrderModel.deleteOne({ orderNumber: newOrder.orderNumber });
         return res.status(400).json({ message: "Invalid suppliers id" });
       }
-      notification.supplierID.push(user_ar[i]._id);
+      console.log("objectId ",user_ar[i]._id);
+      let userId = user_ar[i]._id.toString();
+      console.log("stringId ",userId);
+      notification.supplierID.push(userId);
       let editUnreadCounter = user_ar[i].unreadCounter + 1;
       await UserModel.updateOne({ _id: user_ar[i]._id }, { unreadCounter: editUnreadCounter });
     }
