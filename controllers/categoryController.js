@@ -59,6 +59,23 @@ exports.categoryAmount = async (req, res) => {
   }
 }
 
+exports.getAllMainCategory = async (req, res) => {
+  try {
+    const data = await CategoryModel.find({});
+    let mainCatArr = [];
+    for(let i=0; i<data.length; i++){
+      mainCatArr.push(data[i].mainCategory);
+    }
+    //To avoid duplications
+    mainCatArr = mainCatArr.filter((v,i,a) => a.indexOf(v) === i);
+    res.json(mainCatArr);
+  }
+  catch (err) {
+    console.log(err);
+    res.status(500).json(err);
+  }
+}
+
 //create new category
 exports.createCategory = async (req, res) => {
   const validBody = validCategory(req.body);
