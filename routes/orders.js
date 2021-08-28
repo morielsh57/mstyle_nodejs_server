@@ -12,6 +12,8 @@ router.get("/singleOrder/:orderNumber", authToken, authAdminToken, orderControll
 
 router.get("/allOrders", authToken,authAdminToken ,orderController.allOrders);
 
+router.get("/allOrders/count", authToken,authAdminToken ,orderController.allOrdersCount);
+
 router.post("/", authToken, orderController.createOrder);
 
 router.patch("/status/:orderNumber", authToken, authAdminToken ,orderController.status);
