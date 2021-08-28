@@ -44,6 +44,27 @@ exports.allOrders = async (req, res) => {
   }
 }
 
+exports.allOrdersCount = async (req, res) => {
+  try {
+    let allOrForSupplier = {};
+    const user = await UserModel.findOne({ _id: req.userData._id })
+    if (user.role === "supplier"){
+      let notificOrderNum = await NotificationModel.find({supplierID:req.userData._id},{orderNumber:1});
+      let OrderNum_ar = [];
+      for(let i=0; i<notificOrderNum.length; i++){
+        OrderNum_ar.push(notificOrderNum[i].orderNumber);
+      }
+      allOrForSupplier = {orderNumber:{$in: OrderNum_ar}}
+    }
+    const data = await OrderModel.countDocuments(allOrForSupplier);
+    res.json({ count: data });
+  }
+  catch (err) {
+    console.log(err);
+    res.status(500).json(err);
+  }
+}
+
 exports.createOrder = async (req, res) => {
   let validBody = validOrder(req.body);
   if (validBody.error) {
@@ -74,9 +95,7 @@ exports.createOrder = async (req, res) => {
         await OrderModel.deleteOne({ orderNumber: newOrder.orderNumber });
         return res.status(400).json({ message: "Invalid suppliers id" });
       }
-      console.log("objectId ",user_ar[i]._id);
       let userId = user_ar[i]._id.toString();
-      console.log("stringId ",userId);
       notification.supplierID.push(userId);
       let editUnreadCounter = user_ar[i].unreadCounter + 1;
       await UserModel.updateOne({ _id: user_ar[i]._id }, { unreadCounter: editUnreadCounter });
@@ -97,6 +116,13 @@ exports.status = async (req, res) => {
   }
   try {
     const data = await OrderModel.updateOne({ orderNumber: req.params.orderNumber }, { status: req.body.status });
+    if(data.n===1){
+      let newType = (req.body.status === "canceled") ? 2 : 1;
+      let updateTypeNot = await NotificationModel.updateOne({orderNumber: req.params.orderNumber},{ type: newType })
+      if(updateTypeNot.n !==1 ){
+        return res.json({message:"update type notification faild"})
+      }
+    }
     return res.json(data);
   }
   catch (err) {
@@ -110,6 +136,9 @@ exports.deleteOrder = async (req, res) => {
     const user = await UserModel.findOne({ _id: req.userData._id })
     if (user.role !== "admin") return res.status(400).json({ message: "You have to be an admin" });
     const data = await OrderModel.deleteOne({ orderNumber: req.params.orderNumber });
+    if(data.n===1){
+      await NotificationModel.deleteOne({orderNumber: req.params.orderNumber});
+    }
     res.json(data);
   }
   catch (err) {
