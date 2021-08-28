@@ -44,6 +44,7 @@ exports.basicDataList = async (req, res) => {
 
   try {
     //?mainCategory=Men(optional)
+    let filter = { size: sizeQ } 
     if (req.query.mainCategory) {
       const categories = await CategoryModel.find({ mainCategory: req.query.mainCategory });
       if (!categories || categories.length == 0) return res.status(400).json({ message: "Category not found" });
@@ -51,26 +52,16 @@ exports.basicDataList = async (req, res) => {
       for (let i = 0; i < categories.length; i++) {
         categoryID_ar.push(categories[i].shortID);
       }
-      const data = await ProductModel.find({ categoryID: { $in: categoryID_ar }, size: sizeQ }, { name: 1, price: 1, images: 1, categoryID: 1, color: 1, size: 1, _id: 1 })
-        .sort({ [sortQ]: ifReverse })
-        .limit(perPage)
-        .skip(page * perPage)
-      res.json(data);
+      filter = { categoryID: { $in: categoryID_ar }, size: sizeQ }
     }
     else if (req.query.name) {
-      const data = await ProductModel.find({ name: req.query.name, size: sizeQ }, { name: 1, price: 1, images: 1, categoryID: 1, color: 1, size: 1, _id: 1 })
+      filter = { name: req.query.name, size: sizeQ }
+    }
+      const data = await ProductModel.find(filter, { name: 1, price: 1, images: 1, categoryID: 1, color: 1, size: 1, _id: 1 })
         .sort({ [sortQ]: ifReverse })
         .limit(perPage)
         .skip(page * perPage)
       res.json(data);
-    }
-    else {
-      const data = await ProductModel.find({ size: sizeQ }, { name: 1, price: 1, images: 1, categoryID: 1, color: 1, size: 1, _id: 1 })
-        .sort({ [sortQ]: ifReverse })
-        .limit(perPage)
-        .skip(page * perPage)
-      res.json(data);
-    }
   }
   catch (err) {
     console.log(err);
