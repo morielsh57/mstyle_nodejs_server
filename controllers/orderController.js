@@ -83,7 +83,7 @@ exports.createOrder = async (req, res) => {
     newOrder.isReview = initializeIsReviewFalse(req.body.cartAr.length);
     await newOrder.save();
 
-    //create notification for the suppliers
+    //create new notification for the suppliers
     let notification = new NotificationModel();
     notification.type = 1;
     notification.orderNumber = newOrder.orderNumber;

@@ -343,7 +343,6 @@ exports.editManyProduct = async (req, res) => {
 
 
 exports.upload = async (req, res) => {
-  // console.log("moriell");
   if (req.files.fileSend) {
     let fileInfo = [];
     if (req.files.fileSend.length === undefined) fileInfo.push(req.files.fileSend);
