@@ -182,7 +182,6 @@ exports.editUserProfile = async (req, res) => {
   const validBody = validUser(req.body);
   if (validBody.error) return res.status(400).json(validBody.error.details);
   try {
-    console.log("here");
     if (req.userData._id !== req.params.id) return res.status(400).json({ message: "error permission" });
     if (req.body.password){
       const salt = await bcrypt.genSalt(10);
